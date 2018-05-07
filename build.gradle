@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName "1.0"
     }
@@ -61,14 +61,12 @@ dependencies {
     //    compile 'javax.activation:activation:1.1.1'
 
     //图片加载器,主要用在ico.ico.widget.imageview中
-
     //    compile 'com.squareup.picasso:picasso:2.3.2'
 
     ////imageloader,图片加载器
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 
     //可以在低版本api中使用高版本的样式
-
     //    compile 'com.avast:android-styled-dialogs:2.3.3'
 
     //垂直的viewpager
@@ -81,27 +79,21 @@ dependencies {
     compile 'com.android.support:design:26.+'
 
     //选择滚轮
-
     //    compile 'cn.aigestudio.wheelpicker:WheelPicker:1.1.2'
 
     //加载动画,搭配recycler endless
-
     //    compile 'com.github.ybq:Android-SpinKit:1.1.0'
 
     //时间选择的dialog
-
     //    compile 'com.code-troopers.betterpickers:library:3.1.0'
 
     //第三方的时间,可以计算两个时间的差,单位有多种可选
-
     //    compile 'joda-time:joda-time:2.3'
 
     //ViewPager的圆点指示器
-
     //    compile 'me.relex:circleindicator:1.2.2'
 
     //安卓6.0运行时权限获取
-
     //    compile 'pub.devrel:easypermissions:1.1.2'
 
     //mqtt
