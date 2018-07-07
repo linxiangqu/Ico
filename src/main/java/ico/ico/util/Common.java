@@ -45,11 +45,13 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -747,8 +749,19 @@ public class Common {
         v.setLayoutParams(lp);
     }
 
+    /**
+     * 根据textView的tag设置
+     *
+     * @param textView
+     * @param obj
+     * @return
+     */
+    public static void setTagText(TextView textView, Object... obj) {
+        textView.setText(String.format(textView.getTag().toString(), obj));
+    }
 
-    //region **************************************************************************************************************** IO
+
+    //region **************************************************************************************************************** security
 
     /**
      * 获取单个文件的MD5值！
@@ -756,7 +769,6 @@ public class Common {
      * @param file
      * @return
      */
-
     public static String getFileMD5(File file) {
         if (!file.isFile()) {
             return null;
@@ -807,6 +819,44 @@ public class Common {
         }
         return map;
     }
+
+    /**
+     * 对一组字节数组进行算法加密,通常加密后的数据无法解密
+     *
+     * @param algorithm 指定使用哪一种算法,通常可以选择的有MD2,MD5,SHA-1,SHA-256,SHA-384,SHA-512
+     * @param bytes     需要进行加密的字节数组
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public static byte[] encrypt(String algorithm, byte[] bytes) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+        return messageDigest.digest(bytes);
+    }
+
+    /**
+     * 使用Base64进行加密
+     * <p>
+     * 从现在加密算法的复杂性来看Base64这种都不好意思说自己是加密，不过对于完全不懂计算机的人来说也够用了。采用Base64编码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。
+     * Base64编码一般用于url的处理，或者说任何你不想让普通人一眼就知道是啥的东西都可以用Base64编码处理后再发布在网络上。F
+     * <p>
+     * Base64算法基于64个基本字符，加密后的string中只包含这64个字符
+     *
+     * @param src
+     * @return
+     */
+    public static String encodeBase64(String src) {
+        byte[] encodeBytes = Base64.encode(src.getBytes(), Base64.DEFAULT);
+        return new String(encodeBytes);
+    }
+
+    public static String decodeBase64(String src) {
+        byte[] decodeBytes = Base64.decode(src, Base64.DEFAULT);
+        return new String(decodeBytes);
+    }
+
+    //endregion
+
+    //region **************************************************************************************************************** IO
 
     /**
      * 获取指定目录下的所有子目录
@@ -1155,10 +1205,6 @@ public class Common {
         }
         return sb.toString();
     }
-    //endregion
-
-
-    //region  **************************************************************************************************************** 输入法
 
     /**
      * 如果输入法在窗口上已经显示，则隐藏，反之则显示
@@ -1180,6 +1226,9 @@ public class Common {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(v, InputMethodManager.SHOW_FORCED);
     }
+    //endregion
+
+    //region  **************************************************************************************************************** 输入法
 
     /**
      * 强制隐藏软键盘
@@ -1203,8 +1252,6 @@ public class Common {
         }
     }
 
-    //endregion
-
 //    /**
 //     * 获取输入法打开的状态
 //     * @param context
@@ -1215,6 +1262,8 @@ public class Common {
 //        boolean isOpen = imm.isActive();//isOpen若返回true，则表示输入法打开
 //        return isOpen;
 //    }
+
+    //endregion
 
     //region  **************************************************************************************************************** 字节转换
 
@@ -1836,6 +1885,7 @@ public class Common {
 
         return null;
     }
+
     //endregion
 
     //region  *****************************************************************************************************************图片图形
@@ -1860,6 +1910,26 @@ public class Common {
         cursor.moveToFirst();
         // 最后根据索引值获取图片路径
         return cursor.getString(column_index);
+    }
+
+    /**
+     * 将一张位图,以fitxy的缩放方式新建,将新的位图返回
+     *
+     * @param originalBitmap 原位图
+     * @param newWidth       新的宽度
+     * @param newHeight      新的高度
+     * @return Bitmap
+     */
+    public static Bitmap genBitmap(Bitmap originalBitmap, float newWidth, float newHeight) {
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+        float xscale = newWidth / originalWidth;
+        float yscale = newHeight / originalHeight;
+        Matrix matrix = new Matrix();
+        matrix.postScale(xscale, yscale);
+        Bitmap changedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalWidth, originalHeight, matrix, true);
+        originalBitmap.recycle();
+        return changedBitmap;
     }
 
     /**

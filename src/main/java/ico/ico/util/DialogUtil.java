@@ -88,6 +88,21 @@ public class DialogUtil {
         return builder.create();
     }
 
+    /**
+     * 创建一个默认的进度条对话框，默认是圆形进度条
+     *
+     * @param context
+     * @param title
+     * @param message
+     */
+    public static AlertDialog createAlert(Context context, int title, int message, int yes, DialogInterface.OnClickListener yOnClick) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(yes, yOnClick);
+        return builder.create();
+    }
+
 
     /**
      * 创建一个默认的进度条对话框，默认是圆形进度条

@@ -27,7 +27,14 @@ import ico.ico.util.log;
  * {@link CommonWebViewClient}实现对链接以TEL开头的电话拨打功能
  */
 public class WebViewHelper {
-    public static void init(WebView webView) {
+
+    /**
+     * 初始化webview
+     *
+     * @param obj     必须传入一个Activity对象或者是Fragment对象,用于拨打电话
+     * @param webView
+     */
+    public static void init(Object obj, WebView webView) {
         WebSettings webSettings = webView.getSettings();
         //设置页面缩放
         webSettings.setSupportZoom(true);
@@ -51,6 +58,13 @@ public class WebViewHelper {
         webSettings.setDefaultTextEncodingName("UTF-8");
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        webView.setWebChromeClient(new CommonWebChromeClient());
+        try {
+            webView.setWebViewClient(new CommonWebViewClient(obj));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -107,9 +121,19 @@ public class WebViewHelper {
         webView.loadUrl(url);
     }
 
+    /**
+     * 加载html代码
+     *
+     * @param webView webview对象
+     * @param data    html代码
+     */
+    public static void loadHtmlCode(WebView webView, String data) {
+        webView.loadData(data, "text/html;charset=UTF-8", "UTF-8");
+    }
 
-    public static abstract class CommonWebChromeClient extends WebChromeClient {
 
+    public static class CommonWebChromeClient extends WebChromeClient {
+        OnImageSelectedListener mOnImageSelectedListener;
         ValueCallback<Uri> mUploadMsg;
         ValueCallback<Uri[]> mUploadMsgs;
 
@@ -132,7 +156,7 @@ public class WebViewHelper {
         public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
             log.w("onShowFileChooser==");
             mUploadMsgs = filePathCallback;
-            onImageSelected();
+            onImageSelected(null, filePathCallback);
             return true;
         }
 
@@ -140,37 +164,61 @@ public class WebViewHelper {
         public void openFileChooser(ValueCallback<Uri> uploadMsg) {
             log.w("onShowFileChooser1==");
             mUploadMsg = uploadMsg;
-            onImageSelected();
+            onImageSelected(uploadMsg, null);
         }
 
         // For Android 3.0+
         public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
             log.w("onShowFileChooser2==");
             mUploadMsg = uploadMsg;
-            onImageSelected();
+            onImageSelected(uploadMsg, null);
         }
 
         // For Android  > 4.1.1
         public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
             log.w("openFileChooser3==");
             mUploadMsg = uploadMsg;
-            onImageSelected();
+            onImageSelected(uploadMsg, null);
         }
 
-        /**
-         * 执行图片选择的具体逻辑操作
-         * 操作成功后，调用mUploadMsg或者mUploadMsgs的onReceiveValue函数进行处理
-         */
-        public abstract void onImageSelected();
+        private void onImageSelected(ValueCallback<Uri> mUploadMsg, ValueCallback<Uri[]> mUploadMsgs) {
+            if (mOnImageSelectedListener != null) {
+                mOnImageSelectedListener.onImageSelected(mUploadMsg, mUploadMsgs);
+            }
+        }
+
+        public OnImageSelectedListener getOnImageSelectedListener() {
+            return mOnImageSelectedListener;
+        }
+
+        public void setOnImageSelectedListener(OnImageSelectedListener mOnImageSelectedListener) {
+            this.mOnImageSelectedListener = mOnImageSelectedListener;
+        }
+
+        public interface OnImageSelectedListener {
+            /**
+             * 当Web控件发起图片选择时触发
+             *
+             * @param mUploadMsg  图片单选时,需要回调传给前台的回调对象
+             * @param mUploadMsgs 图片单选时,需要回调传给前台的回调对象
+             */
+            void onImageSelected(ValueCallback<Uri> mUploadMsg, ValueCallback<Uri[]> mUploadMsgs);
+        }
     }
 
     public static class CommonWebViewClient extends WebViewClient {
-
         Object mObject;
 
-
-        public CommonWebViewClient(Object object) {
+        /**
+         * 初始化webview客户端
+         *
+         * @param object 必须传入一个Activity对象或者是Fragment对象,用于拨打电话
+         */
+        public CommonWebViewClient(Object object) throws Exception {
             this.mObject = object;
+            if (!(object instanceof Activity) && (object instanceof Fragment)) {
+                throw new Exception("object must instanceof Activity or Fragment");
+            }
         }
 
         @Override
@@ -194,7 +242,5 @@ public class WebViewHelper {
             WebViewHelper.loadNetHtml(view, url);
             return super.shouldOverrideUrlLoading(view, url);
         }
-
-
     }
 }

@@ -20,6 +20,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import ico.ico.constant.ImageLoaderPrefixConstant;
@@ -28,11 +29,12 @@ import ico.ico.constant.ImageLoaderPrefixConstant;
  * Created by Administrator on 2017/8/9.
  */
 
-public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extends RecyclerView.Adapter<HOLDER> {
+public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extends RecyclerView.Adapter<HOLDER> {
 
     public final static DisplayImageOptions.Builder build = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true);
 
     protected int selectPosition = -1;
+    protected HashSet<Integer> selectPositions = new HashSet<>();
     protected Context mContext;
     protected LayoutInflater mInflater;
     protected int count = 0;
@@ -87,7 +89,6 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
         return count;
     }
 
-
     public BaseAdapter setCount(int count) {
         this.count = count;
         return this;
@@ -130,6 +131,24 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
         return this;
     }
 
+    public HashSet<Integer> getSelectPositions() {
+        return selectPositions;
+    }
+
+    public void addSelectPositions(int _selectPosition) {
+        this.selectPositions.add(Integer.valueOf(_selectPosition));
+        notifyItemChanged(_selectPosition);
+    }
+
+    public void removeSelectPositions(int _selectPosition) {
+        this.selectPositions.remove(Integer.valueOf(_selectPosition));
+        notifyItemChanged(_selectPosition);
+    }
+
+    public void clearSelectPositions() {
+        this.selectPositions.clear();
+    }
+
     public int getSelectPosition() {
         return selectPosition;
     }
@@ -139,6 +158,10 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
         selectPosition = _selectPosition;
         if (__selectPosition != -1) notifyItemChanged(__selectPosition);
         if (selectPosition != -1) notifyItemChanged(selectPosition);
+    }
+
+    public void clearSelectPosition() {
+        setSelectPosition(-1);
     }
 
     public class BaseViewHolder extends RecyclerView.ViewHolder {
@@ -169,6 +192,12 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
             return this;
         }
 
+        /*设置文字控件*/
+        public BaseViewHolder setText(int widgetId, @StringRes int strRes) {
+            ((TextView) getView(widgetId)).setText(strRes);
+            return this;
+        }
+
         /*设置控件的background属性*/
         public BaseViewHolder setBackground(int widgetId, @DrawableRes int resId) {
             getView(widgetId).setBackgroundResource(resId);
@@ -181,12 +210,13 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
             return this;
         }
 
-        /*设置CompoundButton控件的checked属性*/
-        public BaseViewHolder setChecked(int widgetId, boolean isChecked) {
-            ((CompoundButton) getView(widgetId)).setChecked(isChecked);
+        /*设置Checked属性*/
+        public BaseViewHolder setChecked(boolean check, int... widgetId) {
+            for (int i = 0; i < widgetId.length; i++) {
+                ((CompoundButton) getView(widgetId[i])).setChecked(check);
+            }
             return this;
         }
-
 
         /*设置的background属性*/
         public BaseViewHolder toogleChecked(int widgetId) {
@@ -229,6 +259,16 @@ public abstract class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolde
                 ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + errorResId, ((ImageView) getView(widgetId)), build.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
             } else {
                 ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), build.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
+            }
+            return this;
+        }
+
+        /*设置本地图形控件*/
+        public BaseViewHolder loadImage(int widgetId, String url, int errorResId, DisplayImageOptions displayImageOptions) {
+            if (TextUtils.isEmpty(url)) {
+                ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + errorResId, ((ImageView) getView(widgetId)), displayImageOptions);
+            } else {
+                ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), displayImageOptions);
             }
             return this;
         }

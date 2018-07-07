@@ -40,7 +40,7 @@ public class RegularConstant {
     /**
      * 身份证
      */
-    public final static String IDENTITY_CARD = "\\d{15}|\\d{18}";
+    public final static String IDENTITY_CARD = "[0-9xX]{18}";
     /**
      * 军官证
      */

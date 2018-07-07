@@ -116,8 +116,6 @@ public abstract class BaseFragActivity extends AppCompatActivity {
 
     /**
      * “返回”按钮
-     *
-     * @param v
      */
     public void onClickBack(View v) {
         mActivity.finish();
@@ -125,30 +123,14 @@ public abstract class BaseFragActivity extends AppCompatActivity {
 
     /**
      * 弹出土司
-     *
-     * @param stringResId
      */
     public void showToast(@StringRes final int stringResId) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                CharSequence content = getResources().getString(stringResId);
-                if (mToast != null) {
-                    mToast.setText(content);
-                    mToast.show();
-                    return;
-                }
-                mToast = Toast.makeText(mActivity, content, Toast.LENGTH_LONG);
-                mToast.show();
-            }
-        });
+        showToast(getResources().getString(stringResId));
     }
 
 
     /**
      * 弹出土司
-     *
-     * @param text
      */
     public void showToast(final CharSequence text) {
         mHandler.post(new Runnable() {
@@ -157,10 +139,16 @@ public abstract class BaseFragActivity extends AppCompatActivity {
                 CharSequence content = TextUtils.isEmpty(text) ?/* getResources().getString(R.string.ico_application_error)*/"程序出错，请稍候再试!" : text;
                 if (mToast != null) {
                     mToast.setText(content);
-                    mToast.show();
                     return;
+                } else {
+                    mToast = Toast.makeText(mActivity, content, Toast.LENGTH_LONG);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mToast = null;
+                        }
+                    }, 3500);
                 }
-                mToast = Toast.makeText(mActivity, content, Toast.LENGTH_LONG);
                 mToast.show();
             }
         });
@@ -168,8 +156,13 @@ public abstract class BaseFragActivity extends AppCompatActivity {
 
     /**
      * 弹出土司
-     *
-     * @param text
+     */
+    public void showToasts(@StringRes final int stringResId) {
+        showToasts(getResources().getString(stringResId));
+    }
+
+    /**
+     * 弹出土司
      */
     public void showToasts(final CharSequence text) {
         mHandler.post(new Runnable() {

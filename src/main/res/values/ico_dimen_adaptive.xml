@@ -24,6 +24,7 @@
     <dimen name="px260_dip">130dip</dimen>
     <dimen name="px250_dip">125dip</dimen>
     <dimen name="px240_dip">120dip</dimen>
+    <dimen name="px228_dip">114dip</dimen>
     <dimen name="px220_dip">110dip</dimen>
     <dimen name="px200_dip">100dip</dimen>
     <dimen name="px190_dip">95dip</dimen>

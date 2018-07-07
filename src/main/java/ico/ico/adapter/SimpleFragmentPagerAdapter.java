@@ -64,7 +64,6 @@ public class SimpleFragmentPagerAdapter extends android.support.v4.app.FragmentP
         if (titles == null || titles.size() == 0) {
             return super.getPageTitle(position);
         }
-
         return titles.get(position);
     }
 

@@ -113,8 +113,6 @@ public abstract class BaseFragment extends Fragment {
 
     /**
      * 弹出土司
-     *
-     * @param stringResId
      */
     public void showToast(@StringRes final int stringResId) {
         mActivity.showToast(stringResId);
@@ -122,8 +120,6 @@ public abstract class BaseFragment extends Fragment {
 
     /**
      * 弹出土司
-     *
-     * @param text
      */
     public void showToast(final CharSequence text) {
         mActivity.showToast(text);
@@ -131,8 +127,13 @@ public abstract class BaseFragment extends Fragment {
 
     /**
      * 弹出土司
-     *
-     * @param text
+     */
+    public void showToasts(@StringRes final int stringResId) {
+        mActivity.showToasts(stringResId);
+    }
+
+    /**
+     * 弹出土司
      */
     public void showToasts(final CharSequence text) {
         mActivity.showToasts(text);
