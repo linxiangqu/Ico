@@ -608,10 +608,6 @@ public class RoundedImageView extends ImageView {
         return mBorderWidth;
     }
 
-    public void setBorderWidth(@DimenRes int resId) {
-        setBorderWidth(getResources().getDimension(resId));
-    }
-
     public void setBorderWidth(float width) {
         if (mBorderWidth == width) {
             return;
@@ -623,12 +619,12 @@ public class RoundedImageView extends ImageView {
         invalidate();
     }
 
-    public int getBorderColor() {
-        return mBorderColor.getDefaultColor();
+    public void setBorderWidth(@DimenRes int resId) {
+        setBorderWidth(getResources().getDimension(resId));
     }
 
-    public void setBorderColor(@ColorRes int color) {
-        setBorderColor(ColorStateList.valueOf(color));
+    public int getBorderColor() {
+        return mBorderColor.getDefaultColor();
     }
 
     public void setBorderColor(ColorStateList colors) {
@@ -643,6 +639,10 @@ public class RoundedImageView extends ImageView {
         if (mBorderWidth > 0) {
             invalidate();
         }
+    }
+
+    public void setBorderColor(@ColorRes int color) {
+        setBorderColor(ColorStateList.valueOf(color));
     }
 
     public ColorStateList getBorderColors() {

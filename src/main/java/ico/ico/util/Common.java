@@ -2321,6 +2321,30 @@ public class Common {
     }
 
     /**
+     * 将一个字符串根据指定长度进行分割
+     *
+     * @return
+     */
+    public static List<String> split(String str, int size) {
+        List<String> data = new ArrayList<>();
+        if (str.length() <= size) {
+            data.add(str);
+            return data;
+        } else {
+            while (true) {
+                if (str.length() > size) {
+                    data.add(str.substring(0, size));
+                } else {
+                    data.add(str.substring(0));
+                    break;
+                }
+                str = str.substring(size);
+            }
+            return data;
+        }
+    }
+
+    /**
      * 每隔几个字符插入一个指定字符
      *
      * @param s        原字符串

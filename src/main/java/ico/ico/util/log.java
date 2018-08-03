@@ -22,6 +22,10 @@ public class log {
      * out等同i，err等同e
      */
     final static int LEVEL = 5;
+    /**
+     * 每次日志输入的最大长度,如果太大将分段输出
+     */
+    final static int MAX_SIZE = 200;
     //用于存储错误日志的保存地址
     public static String LOG;
 
@@ -34,7 +38,10 @@ public class log {
             return;
         }
         String tag = COMMON_TAG + "v_" + Common.concat("_", tags);
-        Log.v(tag, msg);
+        List<String> data = Common.split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.v(tag, data.get(i));
+        }
     }
 
     public static void d(String msg, String... tags) {
@@ -42,7 +49,10 @@ public class log {
             return;
         }
         String tag = COMMON_TAG + "d_" + Common.concat("_", tags);
-        Log.d(tag, msg);
+        List<String> data = Common.split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.d(tag, data.get(i));
+        }
     }
 
     public static void i(String msg, String... tags) {
@@ -50,7 +60,10 @@ public class log {
             return;
         }
         String tag = COMMON_TAG + "i_" + Common.concat("_", tags);
-        Log.i(tag, msg);
+        List<String> data = Common.split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.i(tag, data.get(i));
+        }
     }
 
     public static void w(String msg, String... tags) {
@@ -58,7 +71,10 @@ public class log {
             return;
         }
         String tag = COMMON_TAG + "w_" + Common.concat("_", tags);
-        Log.w(tag, msg);
+        List<String> data = Common.split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.w(tag, data.get(i));
+        }
     }
 
     public static void e(String msg, String... tags) {
@@ -66,7 +82,10 @@ public class log {
             return;
         }
         String tag = COMMON_TAG + "e_" + Common.concat("_", tags);
-        Log.e(tag, msg);
+        List<String> data = Common.split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.e(tag, data.get(i));
+        }
     }
 
 
@@ -142,9 +161,9 @@ public class log {
         try {
             fw = new FileWriter(file, isAppend);
             if (isAppend) {
-                fw.write(text);
+                fw.write(text + "\n");
             } else {
-                fw.write(text);
+                fw.write(text + "\n");
             }
             fw.flush();
         } catch (FileNotFoundException e) {
@@ -154,5 +173,6 @@ public class log {
                 fw.close();
             }
         }
+        log.out("已写入" + LOG);
     }
 }

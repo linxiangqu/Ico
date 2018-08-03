@@ -116,6 +116,14 @@ public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extend
         return this;
     }
 
+    public BaseAdapter addData(int index, DATA _data) {
+        if (this.data == null) {
+            this.data = new ArrayList<>();
+        }
+        this.data.add(index, _data);
+        return this;
+    }
+
     public boolean contains(DATA _data) {
         if (this.data == null) return false;
         return this.data.contains(_data);

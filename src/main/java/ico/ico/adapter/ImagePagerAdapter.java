@@ -112,6 +112,15 @@ public class ImagePagerAdapter extends PagerAdapter {
         return mImages;
     }
 
+    public ImagePagerAdapter setImages(String... images) {
+        this.mImages = images;
+        this.imageViews = null;
+        if (mImages != null) {
+            this.imageViews = new ImageView[mImages.length];
+        }
+        return this;
+    }
+
     public ImagePagerAdapter setImages(List<String> images) {
         this.mImages = new String[images.size()];
         images.toArray(this.mImages);
@@ -122,25 +131,8 @@ public class ImagePagerAdapter extends PagerAdapter {
         return this;
     }
 
-    public ImagePagerAdapter setImages(String... images) {
-        this.mImages = images;
-        this.imageViews = null;
-        if (mImages != null) {
-            this.imageViews = new ImageView[mImages.length];
-        }
-        return this;
-    }
-
     public Bitmap[] getBitmaps() {
         return mBitmaps;
-    }
-
-    public void setBitmaps(Bitmap... bitmaps) {
-        this.mBitmaps = bitmaps;
-        this.imageViews = null;
-        if (bitmaps != null) {
-            this.imageViews = new ImageView[bitmaps.length];
-        }
     }
 
     public void setBitmaps(List<Bitmap> bitmaps) {
@@ -149,6 +141,14 @@ public class ImagePagerAdapter extends PagerAdapter {
         this.imageViews = null;
         if (bitmaps != null) {
             this.imageViews = new ImageView[bitmaps.size()];
+        }
+    }
+
+    public void setBitmaps(Bitmap... bitmaps) {
+        this.mBitmaps = bitmaps;
+        this.imageViews = null;
+        if (bitmaps != null) {
+            this.imageViews = new ImageView[bitmaps.length];
         }
     }
 
