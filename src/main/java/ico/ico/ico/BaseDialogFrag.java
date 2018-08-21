@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import ico.ico.util.log;
 
 /**
- * Created by admin on 2015/3/11.
+ * Created by admin on 2015/3/11.-
  */
 public abstract class BaseDialogFrag extends DialogFragment {
     public BaseFragActivity mActivity;
