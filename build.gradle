@@ -22,6 +22,10 @@ android {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/rxjava.properties'
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 /*endless必要配置,该配置需要设置到app的build中*/
 allprojects {
@@ -38,6 +42,7 @@ dependencies {
     api 'com.android.support:support-v4:26.+'
     api 'com.android.support:appcompat-v7:26.+'
     api 'com.android.support:recyclerview-v7:26.+'
+    //加载更多 https://github.com/ybq/Endless-RecyclerView
     api 'com.github.ybq:Endless-RecyclerView:1.0.3'
     api 'com.squareup.okhttp3:okhttp:3.5.0'
     //----------rx-----------
@@ -65,7 +70,7 @@ dependencies {
     api 'com.android.support:design:26.+'
     //选择滚轮
     //    api 'cn.aigestudio.wheelpicker:WheelPicker:1.1.2'
-    //加载动画,搭配recycler endless
+    //加载动画,搭配recycler endless https://github.com/ybq/Android-SpinKit
     //    api 'com.github.ybq:Android-SpinKit:1.1.0'
     //时间选择的dialog
     //    api 'com.code-troopers.betterpickers:library:3.1.0'
@@ -77,6 +82,10 @@ dependencies {
     //    api 'pub.devrel:easypermissions:1.1.2'
     //mqtt
     api 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0'
+    //recyclerview,自动换行,流式布局,通过FlowLayoutManager计算总体高度,在recyclerview初始化完成后设置recyclerview高度即可
+    //    api 'com.github.1002326270xc:LayoutManager-FlowLayout:v1.3'
+    //侧滑删除   https://github.com/daimajia/AndroidSwipeLayout
+    api 'com.daimajia.swipelayout:library:1.2.0@aar'
 }
 /*同步support包版本*/
 configurations.all {
@@ -92,23 +101,6 @@ configurations.all {
 /*解决在编译时一个findbugs的编译报错*/
 configurations.all {
     resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
-}
-/*这一部分是应用java8的配置,复制到appmoudle中就可以使用java8的特性*/
-apply plugin: 'me.tatarka.retrolambda'
-android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.2.5'
-    }
 }
 
 // Required because retrolambda is on maven central
