@@ -35,7 +35,7 @@ allprojects {
 }
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     api 'com.fasterxml.jackson.core:jackson-databind:2.7.1'
     api 'com.fasterxml.jackson.core:jackson-core:2.7.1'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.7.1'
@@ -86,6 +86,9 @@ dependencies {
     //    api 'com.github.1002326270xc:LayoutManager-FlowLayout:v1.3'
     //侧滑删除   https://github.com/daimajia/AndroidSwipeLayout
     api 'com.daimajia.swipelayout:library:1.2.0@aar'
+    //butterknife https://github.com/JakeWharton/butterknife
+    api 'com.jakewharton:butterknife:9.0.0-rc1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
 }
 /*同步support包版本*/
 configurations.all {
