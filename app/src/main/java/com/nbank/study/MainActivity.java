@@ -1,14 +1,11 @@
 package com.nbank.study;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 import ico.ico.ico.BaseFragActivity;
 
 public class MainActivity extends BaseFragActivity {
@@ -17,8 +14,7 @@ public class MainActivity extends BaseFragActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        EventBus.getDefault().register(this);
+        ButterKnife.bind(this);
     }
 
     @OnClick(R.id.btn_camera)

@@ -27,12 +27,16 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import ico.ico.ico.BaseFragActivity;
 import ico.ico.util.Common;
 import ico.ico.util.log;
 
 public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
+    @BindView(R.id.preview)
     SurfaceView preview;
     SurfaceHolder holder;
 
@@ -40,18 +44,10 @@ public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Ca
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        ButterKnife.bind(this);
 
         log.w("onCreate: " + getResources().getDisplayMetrics().widthPixels + "|" + getResources().getDisplayMetrics().heightPixels);
 
-//        EventBus.getDefault().registerSticky(this);
-        findViewById(R.id.txt).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault().post("aaaa");
-            }
-        });
-
-        preview = findViewById(R.id.preview);
         holder = preview.getHolder();
         holder.addCallback(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -66,15 +62,14 @@ public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Ca
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             }
         }
-        preview.setOnClickListener(new View.OnClickListener() {
+    }
+
+    @OnClick(R.id.preview)
+    public void clickFocus(){
+        camera.autoFocus(new Camera.AutoFocusCallback() {
             @Override
-            public void onClick(View v) {
-                camera.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean success, Camera camera) {
-                        log.w("onAutoFocus: ");
-                    }
-                });
+            public void onAutoFocus(boolean success, Camera camera) {
+                log.w("onAutoFocus: ");
             }
         });
     }
@@ -84,29 +79,6 @@ public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Ca
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
-
-
-    //region EventBus
-    public void onEvent(Object testEvent) {
-        if (testEvent instanceof String) {
-            log.w("onEventStr: " + testEvent + "|" + Thread.currentThread());
-        } else {
-            log.w("onEventInt: " + testEvent + "|" + Thread.currentThread());
-        }
-    }
-
-    public void onEventAsync(String testEvent) {
-        log.w("onEventAsync: " + testEvent + "|" + Thread.currentThread());
-    }
-
-    public void onEventMainThread(String testEvent) {
-        log.w("onEventMainThread: " + testEvent + "|" + Thread.currentThread());
-    }
-
-    public void onEventBackgroundThread(String testEvent) {
-        log.w("onEventBackgroundThread: " + testEvent + "|" + Thread.currentThread());
-    }
-    //endregion
 
     Camera camera;
 
@@ -355,6 +327,7 @@ public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Ca
                 camera.getParameters().getPreviewSize().height);
         File file = new File(Environment.getExternalStorageDirectory() + "/test/ddd" + System.currentTimeMillis() + ".jpg");
         try {
+            //确保文件存在，如果不存在就修改文件名然后创建，然后返回对应的文件对象
             File _file = Common.ensureFileACreate(file);
             yuvImage.compressToJpeg(rect, 100, new FileOutputStream(_file));
             log.w("==" + _file.getAbsolutePath());

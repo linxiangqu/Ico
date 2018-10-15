@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".TbsActivity">
 
+    <EditText
+        android:id="@+id/et_file"
+        android:text="/storage/emulated/0/tencent/MicroMsg/Download/陈方毅劳动合同.pdf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/btn_reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设置为存储目录" />
     <Button
         android:id="@+id/btn_pdf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="陈方毅劳动合同.pdf"/>
+        android:text="QbSdk打开" />
+    <Button
+        android:id="@+id/btn_pdf_inner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TbsReadView内部打开" />
 
+    <RelativeLayout
+        android:id="@+id/layout_readview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </RelativeLayout>
 </LinearLayout>
