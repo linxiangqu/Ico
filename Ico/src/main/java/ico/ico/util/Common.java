@@ -944,7 +944,12 @@ public class Common {
         return files;
     }
 
-    /** 获取文件的后缀名 */
+    /**
+     * 获取文件的后缀名,不包含点
+     *
+     * @param file 要获取后缀名的文件对象
+     * @return
+     */
     public static String getSuffix(File file) {
         String suffix = "";
         if (file.getName().lastIndexOf(".") == -1) {
@@ -954,16 +959,21 @@ public class Common {
         return suffix;
     }
 
-    /** 获取文件后缀 */
+    /**
+     * 获取文件后缀
+     *
+     * @param filePath 文件的绝对路径
+     * @return
+     */
     public static String getSuffix(String filePath) {
         File file = new File(filePath);
         return getSuffix(file);
     }
 
     /**
-     * 获取文件的文件名
+     * 获取文件的文件名,不包含点和后缀
      *
-     * @param file
+     * @param file 要获取的文件对象
      * @return
      */
     public static String getFilename(File file) {
