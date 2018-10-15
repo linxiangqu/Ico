@@ -102,10 +102,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/shaders" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
-<<<<<<< HEAD:Ico/Ico.iml
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/transforms" />
-=======
->>>>>>> 9e9849cc3e68977e87f47fc5f2dfc83c59109583:Ico.iml
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
@@ -147,10 +144,7 @@
     <orderEntry type="library" name="Gradle: com.android.support:support-core-ui-26.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.hamcrest:hamcrest-core:1.3@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.7.1@jar" level="project" />
-<<<<<<< HEAD:Ico/Ico.iml
     <orderEntry type="library" name="Gradle: pub.devrel:easypermissions-2.0.0" level="project" />
-=======
->>>>>>> 9e9849cc3e68977e87f47fc5f2dfc83c59109583:Ico.iml
     <orderEntry type="library" name="Gradle: com.android.support:support-core-utils-26.1.0" level="project" />
     <orderEntry type="library" name="Gradle: com.daimajia.swipelayout:library-1.2.0" level="project" />
     <orderEntry type="library" name="Gradle: com.trello:rxlifecycle-components-1.0" level="project" />

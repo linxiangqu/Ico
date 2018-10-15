@@ -2442,8 +2442,9 @@ public class Common {
     /**
      * 将一个字符串数组根据某个字符串连接
      *
-     * @param texts
-     * @param str
+     * @param str   要插入的字符串
+     * @param texts 要被拼接的字符串数组
+     * @return
      */
     public static String concat(String str, String... texts) {
         StringBuilder sb = new StringBuilder();
