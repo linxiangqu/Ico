@@ -11,16 +11,12 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-
-import com.nbank.study.util.Common;
-import com.nbank.study.util.log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,8 +28,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import ico.ico.ico.BaseFragActivity;
+import ico.ico.util.Common;
+import ico.ico.util.log;
 
-public class CameraActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class CameraActivity extends BaseFragActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
     SurfaceView preview;
     SurfaceHolder holder;
 

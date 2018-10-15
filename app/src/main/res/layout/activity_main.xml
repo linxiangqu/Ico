@@ -8,14 +8,14 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/btn_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClickCamera"
         android:text="摄像头"/>
 
     <Button
+        android:id="@+id/btn_tbs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClickTBS"
         android:text="TBS"/>
 </LinearLayout>

@@ -96,6 +96,15 @@ import static android.content.Context.VIBRATOR_SERVICE;
  */
 public class Common {
 
+    /**
+     * 使用原生代码获取当前gps位置
+     * <p>
+     * 之前猎狐项目h5界面请求需要gps，但是h5转化成百度坐标又问题，所以最后还是接了百度sdk
+     *
+     * @param context
+     * @param locationListener
+     * @return
+     */
     public static Location getMyLocation(Context context, LocationListener locationListener) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -183,6 +192,20 @@ public class Common {
     }
 
     /**
+     * 生成一个小于等于X,大于0的值
+     *
+     * @param x
+     * @return
+     */
+    public static int random(int x) {
+        Random random = new Random();
+        random.setSeed(new Date().getTime());
+        return (random.nextInt(x) + 1);
+    }
+
+    //region ************************************************************************************************获取相关目录
+
+    /**
      * 获取当前设备可用的存储目录
      *
      * @return List<File> 如果为空则没有可用的存储目录
@@ -224,7 +247,9 @@ public class Common {
         }
         return new ArrayList<File>(storage.values());
     }
+    //endregion
 
+    //region ************************************************************************************************Download服务
 
     /**
      * 判断是否启用了download服务
@@ -260,7 +285,9 @@ public class Common {
         intent.setData(Uri.parse("package:" + packageName));
         context.startActivity(intent);
     }
+    //endregion
 
+    //region ************************************************************************************************单位换算
 
     /**
      * dip转换px
@@ -319,11 +346,23 @@ public class Common {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
         return (int) (spValue * fontScale + 0.5f);
     }
+    //endregion
 
+    //region ************************************************************************************************震动相关
+
+    /**
+     * 触发震动
+     *
+     * @param context
+     * @param milliseconds
+     */
     public static void vibrate(Context context, int milliseconds) {
         Vibrator vibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(milliseconds);
     }
+    //endregion
+
+    //region ************************************************************************************************获取手机标识，包括mac地址，唯一码等信息
 
     /**
      * 获取设备的mac地址
@@ -385,6 +424,10 @@ public class Common {
         return macAddress;
     }
 
+    public interface LocalMacCallback {
+        void onLocalMac(String result);
+    }
+
     /**
      * 获取设备唯一标识
      * http://blog.csdn.net/sunsteam/article/details/73189268
@@ -402,46 +445,9 @@ public class Common {
             return id;
         }
     }
+    //endregion
 
-    private static String toMD5(String text) throws NoSuchAlgorithmException {
-        //获取摘要器 MessageDigest
-        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-        //通过摘要器对字符串的二进制字节数组进行hash计算
-        byte[] digest = messageDigest.digest(text.getBytes());
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < digest.length; i++) {
-            //循环每个字符 将计算结果转化为正整数;
-            int digestInt = digest[i] & 0xff;
-            //将10进制转化为较短的16进制
-            String hexString = Integer.toHexString(digestInt);
-            //转化结果如果是个位数会省略0,因此判断并补0
-            if (hexString.length() < 2) {
-                sb.append(0);
-            }
-            //将循环结果添加到缓冲区
-            sb.append(hexString);
-        }
-        //返回整个结果
-        return sb.toString();
-    }
-
-    /**
-     * 判断用户触摸位置是否为控件所在的位置
-     *
-     * @param v  要判断的控件
-     * @param ev 触摸事件的信息
-     * @return
-     */
-    public static boolean isTouch(View v, MotionEvent ev) {
-        int[] location = {0, 0};
-        v.getLocationInWindow(location);
-        if (ev.getRawX() > location[0] && ev.getRawX() < location[0] + v.getWidth() && ev.getRawY() > location[1] && ev.getRawY() < location[1] + v.getHeight()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    //region ************************************************************************************************屏幕
 
     /**
      * 获取当前屏幕的开关状态
@@ -473,6 +479,9 @@ public class Common {
     public static int getScreenHeight(Context context) {
         return context.getResources().getDisplayMetrics().heightPixels;
     }
+    //endregion
+
+    //region ************************************************************************************************版本
 
     /**
      * 获取当前app的版本名称
@@ -493,6 +502,9 @@ public class Common {
     public static int getVersionCode(Context context) throws PackageManager.NameNotFoundException {
         return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
     }
+    //endregion
+
+    //region ************************************************************************************************状态栏
 
     /**
      * 获取当前手机顶部状态栏的高度
@@ -542,6 +554,9 @@ public class Common {
         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
         return resources.getDimensionPixelSize(resourceId);
     }
+    //endregion
+
+    //region ************************************************************************************************虚拟按键
 
     /**
      * 获取当前手机底部导航栏的高度
@@ -582,18 +597,9 @@ public class Common {
         }
         return hasNavigationBar;
     }
+    //endregion
 
-    /**
-     * 生成一个小于等于X,大于0的值
-     *
-     * @param x
-     * @return
-     */
-    public static int random(int x) {
-        Random random = new Random();
-        random.setSeed(new Date().getTime());
-        return (random.nextInt(x) + 1);
-    }
+    //region ************************************************************************************************铃声相关
 
     /**
      * 根据type设置铃声
@@ -648,6 +654,9 @@ public class Common {
 //         Ringtone rt = RingtoneManager.getRingtone(this, newUri);
 //         rt.play();
     }
+    //endregion
+
+    //region ************************************************************************************************前后台判断
 
     /**
      * 判断程序是否在后台
@@ -683,6 +692,9 @@ public class Common {
 //        log.w("前台");
         return false;
     }
+    //endregion
+
+    //region ************************************************************************************************网络判断
 
     /**
      * 查询当前是否有网络,通过ping的方式
@@ -734,6 +746,9 @@ public class Common {
         }
         return false;
     }
+    //endregion
+
+    //region ************************************************************************************************ViewUtil
 
     /**
      * 设置一个控件的宽度和高度,若为空则不改变
@@ -760,8 +775,25 @@ public class Common {
         textView.setText(String.format(textView.getTag().toString(), obj));
     }
 
+    /**
+     * 判断用户触摸位置是否为控件所在的位置
+     *
+     * @param v  要判断的控件
+     * @param ev 触摸事件的信息
+     * @return
+     */
+    public static boolean isTouch(View v, MotionEvent ev) {
+        int[] location = {0, 0};
+        v.getLocationInWindow(location);
+        if (ev.getRawX() > location[0] && ev.getRawX() < location[0] + v.getWidth() && ev.getRawY() > location[1] && ev.getRawY() < location[1] + v.getHeight()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //endregion
 
-    //region **************************************************************************************************************** security
+    //region ************************************************************************************************security
 
     /**
      * 获取单个文件的MD5值！
@@ -856,7 +888,7 @@ public class Common {
 
     //endregion
 
-    //region **************************************************************************************************************** IO
+    //region ************************************************************************************************IO
 
     /**
      * 获取指定目录下的所有子目录
@@ -913,7 +945,7 @@ public class Common {
     }
 
     /**
-     * 获取文件的后缀名,带.
+     * 获取文件的后缀名
      *
      * @param file
      * @return String
@@ -923,8 +955,23 @@ public class Common {
         if (file.getName().lastIndexOf(".") == -1) {
             return suffix;
         }
-        suffix = file.getName().substring(file.getName().lastIndexOf("."));
+        suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1);
         return suffix;
+    }
+
+    /**
+     * 获取文件的文件名
+     *
+     * @param file
+     * @return
+     */
+    public static String getFilename(File file) {
+        String filename = "";
+        if (file.getName().lastIndexOf(".") == -1) {
+            return filename;
+        }
+        filename = file.getName().substring(0, file.getName().lastIndexOf("."));
+        return filename;
     }
 
     /**
@@ -1033,13 +1080,7 @@ public class Common {
      * @param isAppend
      */
     public static void writeFile(File file, String text, boolean isAppend) throws IOException {
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
+        ensureFile(file);
         FileWriter fw = null;
         try {
             fw = new FileWriter(file, isAppend);
@@ -1059,30 +1100,13 @@ public class Common {
     }
 
     /**
-     * 向指定文件中写入字符串
+     * 向指定文件中写入字节数组
      *
      * @param file
      * @param buffer
      */
     public static void writeFile(File file, byte... buffer) throws IOException {
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            for (int i = 0; i < Integer.MAX_VALUE; i++) {
-                //获取名称
-                String[] filename = file.getName().split("\\.");
-                File tmp = new File(file.getParent(), filename[0] + "(" + i + ")." + filename[1]);
-                if (!tmp.exists()) {
-                    log.w("===" + tmp.getAbsolutePath());
-                    tmp.createNewFile();
-                    file = tmp;
-                    return;
-                }
-            }
-        }
+        ensureFile(file);
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
@@ -1095,6 +1119,93 @@ public class Common {
                 out.close();
             }
         }
+    }
+
+    /**
+     * 向指定文件中写入字节数组,这是一个图片文件
+     *
+     * @param file
+     * @param buffer
+     */
+    public static File writeFileAImage(File file, byte... buffer) throws IOException {
+        File _file = ensureFileACreate(file);
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(_file));
+            out.write(buffer);
+            out.flush();
+            return _file;
+        } catch (FileNotFoundException e) {
+            throw e;
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+
+    /**
+     * 确保文件存在,如果文件不存在则创建
+     *
+     * @param file
+     * @throws IOException
+     */
+    public static void ensureFile(File file) throws IOException {
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        if (file.exists()) {
+            file.createNewFile();
+        }
+    }
+
+    /**
+     * 确保文件存在,如果文件存在则删除重新创建
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static void ensureFileADelete(File file) throws IOException {
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        if (!file.exists()) {
+            file.createNewFile();
+        } else {
+            //如果已存在，则删除，并重新创建
+            file.delete();
+            file.createNewFile();
+        }
+    }
+
+    /**
+     * 确保文件存在,如果文件存在则修改文件名称重新创建
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static File ensureFileACreate(File file) throws IOException {
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        if (!file.exists()) {
+            file.createNewFile();
+            return file;
+        }
+        //如果已存在，则filename(n).suffix
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            //获取名称
+            String filename = getFilename(file);
+            String suffix = getSuffix(file);
+            File tmp = new File(file.getParent(), filename + "(" + i + ")." + suffix);
+            if (!tmp.exists()) {
+                tmp.createNewFile();
+                return tmp;
+            }
+        }
+        throw new IOException("无法创建文件" + file.getAbsolutePath());
     }
 
     /**
@@ -1207,6 +1318,34 @@ public class Common {
     }
 
     /**
+     * 递归删除 文件/文件夹
+     *
+     * @param file
+     */
+    public static void deleteFile(File file) {
+
+        log.w("delete file path=" + file.getAbsolutePath());
+
+        if (file.exists()) {
+            if (file.isFile()) {
+                file.delete();
+            } else if (file.isDirectory()) {
+                File files[] = file.listFiles();
+                for (int i = 0; i < files.length; i++) {
+                    deleteFile(files[i]);
+                }
+            }
+            file.delete();
+        } else {
+            log.e("delete file no exists " + file.getAbsolutePath());
+        }
+    }
+
+    //endregion
+
+    //region ************************************************************************************************输入法
+
+    /**
      * 如果输入法在窗口上已经显示，则隐藏，反之则显示
      *
      * @param context
@@ -1226,9 +1365,6 @@ public class Common {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(v, InputMethodManager.SHOW_FORCED);
     }
-    //endregion
-
-    //region  **************************************************************************************************************** 输入法
 
     /**
      * 强制隐藏软键盘
@@ -1265,7 +1401,7 @@ public class Common {
 
     //endregion
 
-    //region  **************************************************************************************************************** 字节转换
+    //region  ************************************************************************************************字节转换
 
     /**
      * 将数值类型转换为IP地址
@@ -1480,7 +1616,7 @@ public class Common {
     }
 
     /**
-     * 将字符串的集合转化为字符串集合
+     * 将保存多个文件路径的集合，转化为File对象的数组
      *
      * @param list
      * @return
@@ -1516,7 +1652,7 @@ public class Common {
     }
     //endregion
 
-    //region  *****************************************************************************************************************Intent
+    //region ************************************************************************************************Intent
 
     /**
      * 意图-社会化分享
@@ -1888,7 +2024,7 @@ public class Common {
 
     //endregion
 
-    //region  *****************************************************************************************************************图片图形
+    //region ************************************************************************************************图片图形
 
     /**
      * 将uri进行解析，返回一直字符串形式的路径
@@ -2260,7 +2396,37 @@ public class Common {
 
     //endregion
 
-    //region *****************************************************************************************************************数据拼接处理
+    //region ************************************************************************************************字符串处理
+
+    /**
+     * 将字符串转化为MD5
+     *
+     * @param text
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    private static String toMD5(String text) throws NoSuchAlgorithmException {
+        //获取摘要器 MessageDigest
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        //通过摘要器对字符串的二进制字节数组进行hash计算
+        byte[] digest = messageDigest.digest(text.getBytes());
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < digest.length; i++) {
+            //循环每个字符 将计算结果转化为正整数;
+            int digestInt = digest[i] & 0xff;
+            //将10进制转化为较短的16进制
+            String hexString = Integer.toHexString(digestInt);
+            //转化结果如果是个位数会省略0,因此判断并补0
+            if (hexString.length() < 2) {
+                sb.append(0);
+            }
+            //将循环结果添加到缓冲区
+            sb.append(hexString);
+        }
+        //返回整个结果
+        return sb.toString();
+    }
 
     /**
      * 将一个字符串数组根据某个字符串连接
@@ -2361,33 +2527,21 @@ public class Common {
         return s1.toString();
     }
 
-    /**
-     * 递归删除 文件/文件夹
-     *
-     * @param file
-     */
-    public static void deleteFile(File file) {
-
-        log.w("delete file path=" + file.getAbsolutePath());
-
-        if (file.exists()) {
-            if (file.isFile()) {
-                file.delete();
-            } else if (file.isDirectory()) {
-                File files[] = file.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    deleteFile(files[i]);
-                }
-            }
-            file.delete();
-        } else {
-            log.e("delete file no exists " + file.getAbsolutePath());
-        }
-    }
-
     //endregion
 
-    public interface LocalMacCallback {
-        void onLocalMac(String result);
+    //region ************************************************************************************************集合处理
+
+    /**
+     * 判断list是否为null或者size==0
+     *
+     * @param list
+     * @return
+     */
+    public boolean listIsEmpty(List list) {
+        if (list == null || list.size() == 0) {
+            return true;
+        }
+        return false;
     }
+    //endregion
 }
