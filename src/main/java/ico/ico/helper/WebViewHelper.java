@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
@@ -14,7 +13,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import ico.ico.util.Common;
+import ico.ico.util.StringUtil;
 import ico.ico.util.log;
 
 /**
@@ -27,6 +26,10 @@ import ico.ico.util.log;
  * {@link CommonWebViewClient}实现对链接以TEL开头的电话拨打功能
  */
 public class WebViewHelper {
+    public final static String PREFIX_JS = "javascript:";
+    public final static String FORMAT_JS_FUNCTION = PREFIX_JS + "%s(%s);";
+    private static final String TAG = WebViewHelper.class.getSimpleName();
+
 
     /**
      * 初始化webview
@@ -67,29 +70,115 @@ public class WebViewHelper {
         }
     }
 
+
+    /**
+     * 对字符串使用单引号包裹
+     *
+     * @param param 要包裹的字符串
+     * @return String 返回包裹后的字符串
+     */
+    public static String wrapParam(Object param) {
+        return wrapParam(param, "'");
+    }
+
+    /**
+     * 对字符串使用指定的字符进行包裹
+     *
+     * @param param   要包裹的字符串
+     * @param wrapStr 包裹使用的字符
+     * @return String 返回包裹后的字符串
+     */
+    public static String wrapParam(Object param, String wrapStr) {
+        return wrapStr + param + wrapStr;
+    }
+
     /**
      * 执行js函数
      *
-     * @param webView webview对象
-     * @param method  要执行的js函数名
-     * @param params  要传入的参数列表
+     * @param webView  webview对象
+     * @param function 要执行的js函数名,格式限定为XXX/XXX()/xxx(...)，函数中带的参数将自动截取，与params进行拼接
+     * @param params   要执行的js函数的参数列表，js函数参数不做处理直接拼接
+     * @return String 返回构造完成并已执行的js代码
      */
-    public static void executeJsMethod(WebView webView, String method, Object... params) {
-        String param = "";
-        for (int i = 0; i < params.length; i++) {
-            if (!TextUtils.isEmpty(params[i].toString())) {
-                if (i == 0) {
-                    param += "'" + params[i].toString() + "'";
-                } else {
-
-                    param += ",'" + params[i].toString() + "'";
-                }
-            }
+    public static String execJsFunction(WebView webView, String function, Object... params) {
+        //empty检查
+        if (StringUtil.isEmpty(function)) {
+            log.ee("execJsFunction,function参数为空，无法构造js代码", TAG);
+            return null;
         }
-        log.w("========" + String.format("javascript:%s(%s);", method, param));
-        webView.loadUrl(String.format("javascript:%s(%s);", method, param));
+
+        String js = genJsCode(function, params);
+        if (!StringUtil.isEmpty(js)) execJsCode(webView, js);
+        log.d("execJsFunction,执行js函数，" + js, TAG);
+        return js;
     }
 
+    /**
+     * 执行js代码
+     *
+     * @param webView webview对象
+     * @param js      要执行的js代码
+     *                可以通过{@link #genJsCode(String, Object...)}构建
+     */
+    public static void execJsCode(WebView webView, String js) {
+        //empty检查
+        if (StringUtil.isEmpty(js)) {
+            log.e("execJsCode,要执行的js代码为空，无法执行", TAG);
+            return;
+        }
+
+        String _js = js;
+        if (!js.startsWith(PREFIX_JS)) _js = PREFIX_JS + js;
+        webView.loadUrl(_js);
+        log.d("execJsCode,执行js代码，" + js, TAG);
+    }
+
+    /**
+     * 创建js函数调用代码
+     *
+     * @param function 要执行的js函数名,格式限定为XXX/XXX()/xxx(...)，函数中带的参数将自动截取，与params进行拼接
+     * @param params   要执行的js函数的参数列表，js函数参数不做处理直接拼接
+     * @return String 返回构造完成后的js代码
+     */
+    public static String genJsCode(String function, Object... params) {
+        //empty检查
+        if (StringUtil.isEmpty(function)) {
+            log.ee("genJsCode,function参数为空，无法构造js代码", TAG);
+            return null;
+        }
+        //函数名
+        String _function = null;
+        //参数
+        StringBuffer _params = new StringBuffer();
+        //首先检查function内带不带参数
+        int start = function.lastIndexOf("(");
+        int end = function.lastIndexOf(")");
+        //start和end都不等于-1，说明中间有参数,将参数拼接到_params
+        if (start != -1 && end != -1) {
+            _params.append(function.substring(start + 1, end));
+        }
+        //取函数名
+        if (start != -1) {
+            _function = function.substring(0, start);
+        } else {
+            _function = function;
+        }
+        //拼接入参的参数
+        if (params != null || params.length != 0) {
+            for (int i = 0; i < params.length; i++) {
+                //空指针判断
+                if (params[i] == null || StringUtil.isEmpty(params[i].toString())) continue;
+
+                String param = params[i].toString().trim();
+                //有数据，拼接逗号
+                if (_params.length() != 0) _params.append(",");
+                //拼接参数
+                _params.append(param);
+            }
+        }
+        String js = String.format(FORMAT_JS_FUNCTION, _function, _params.toString());
+        return js;
+    }
 
     /**
      * 加载asset中的html文件
@@ -130,7 +219,6 @@ public class WebViewHelper {
     public static void loadHtmlCode(WebView webView, String data) {
         webView.loadData(data, "text/html;charset=UTF-8", "UTF-8");
     }
-
 
     public static class CommonWebChromeClient extends WebChromeClient {
         OnImageSelectedListener mOnImageSelectedListener;
@@ -233,14 +321,21 @@ public class WebViewHelper {
             log.w("shouldOverrideUrlLoading=" + url);
             if (url.toUpperCase().startsWith("TEL")) {
                 if (mObject instanceof Activity) {
-                    ((Activity) mObject).startActivity(Common.getIntentByDial(url.substring(4)));
+                    ((Activity) mObject).startActivity(getIntentByDial(url.substring(4)));
                 } else if (mObject instanceof Fragment) {
-                    ((Fragment) mObject).startActivity(Common.getIntentByDial(url.substring(4)));
+                    ((Fragment) mObject).startActivity(getIntentByDial(url.substring(4)));
                 }
                 return true;
             }
             WebViewHelper.loadNetHtml(view, url);
             return super.shouldOverrideUrlLoading(view, url);
         }
+    }
+
+    /** 意图--跳转拨打电话的界面，自动填入电话号码 */
+    public static Intent getIntentByDial(String phone) {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phone));
+        return intent;
     }
 }

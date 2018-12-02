@@ -90,13 +90,18 @@ public class BaseApplication extends Application {
      * 所以在程序启动时获取mac地址进行保存
      */
     public void initLocalMac() {
-        Common.getLocalMac(this, new Common.LocalMacCallback() {
+        new Thread() {
             @Override
-            public void onLocalMac(String result) {
-                log.w("localMac = " + result);
-                setLocalMac(result);
+            public void run() {
+                Common.getLocalMac(BaseApplication.getInstance(), new Common.LocalMacCallback() {
+                    @Override
+                    public void onLocalMac(String result) {
+                        log.w("localMac = " + result);
+                        setLocalMac(result);
+                    }
+                });
             }
-        });
+        }.start();
     }
 
     public String getLocalMac() {

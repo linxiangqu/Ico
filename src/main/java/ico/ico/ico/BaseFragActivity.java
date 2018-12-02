@@ -47,11 +47,6 @@ public abstract class BaseFragActivity extends AppCompatActivity {
         /*程序退出广播*/
         exitReceiver = new ExitReceiver();
         mActivity.registerReceiver(exitReceiver, new IntentFilter(ActionConstant.BROADCAST_APP_EXIT));
-        //设置通知栏透明
-//        Window window = getWindow();
-//        window.requestFeature(Window.FEATURE_NO_TITLE);
-//      window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-//      windo.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
     }
 
     /*点击空白处隐藏软键盘*/
