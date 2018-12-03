@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
@@ -102,13 +103,13 @@ public class WebViewHelper {
      */
     public static String execJsFunction(WebView webView, String function, Object... params) {
         //empty检查
-        if (StringUtil.isEmpty(function)) {
+        if (TextUtils.isEmpty(function)) {
             log.ee("execJsFunction,function参数为空，无法构造js代码", TAG);
             return null;
         }
 
         String js = genJsCode(function, params);
-        if (!StringUtil.isEmpty(js)) {
+        if (!TextUtils.isEmpty(js)) {
             execJsCode(webView, js);
         }
         log.d("execJsFunction,执行js函数，" + js, TAG);
@@ -124,7 +125,7 @@ public class WebViewHelper {
      */
     public static void execJsCode(WebView webView, String js) {
         //empty检查
-        if (StringUtil.isEmpty(js)) {
+        if (TextUtils.isEmpty(js)) {
             log.e("execJsCode,要执行的js代码为空，无法执行", TAG);
             return;
         }
@@ -146,7 +147,7 @@ public class WebViewHelper {
      */
     public static String genJsCode(String function, Object... params) {
         //empty检查
-        if (StringUtil.isEmpty(function)) {
+        if (TextUtils.isEmpty(function)) {
             log.ee("genJsCode,function参数为空，无法构造js代码", TAG);
             return null;
         }
@@ -171,7 +172,7 @@ public class WebViewHelper {
         if (params != null || params.length != 0) {
             for (int i = 0; i < params.length; i++) {
                 //空指针判断
-                if (params[i] == null || StringUtil.isEmpty(params[i].toString())) {
+                if (params[i] == null || TextUtils.isEmpty(params[i].toString())) {
                     continue;
                 }
 

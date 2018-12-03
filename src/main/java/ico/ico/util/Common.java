@@ -1599,7 +1599,7 @@ public class Common {
      * @return
      */
     public static byte[] hexstr2Bytes(String joinStr, String mac) throws IllegalArgumentException {
-        if (StringUtil.isEmpty(mac)) {
+        if (TextUtils.isEmpty(mac)) {
             return null;
         }
         mac = mac.toUpperCase();

@@ -100,7 +100,7 @@ public abstract class ValidateTools {
      * 验证是否只为英文(A-Z a-z) 是:返回true 否:返回false
      */
     public static boolean isLowerOrUpperCase(String string) {
-        return matcher(string, REGEX_LowerOrUpperCase);
+        return matcher(string, REGEX_LOWER_OR_UPPER_CASE);
     }
 
     /**
@@ -142,14 +142,14 @@ public abstract class ValidateTools {
      * 验证只能由A-Z a-z 0-9组成
      */
     public static boolean isAzazNum(String string) {
-        return matcher(string, REGEX_AZ_az_Num_DOWNLINE);
+        return matcher(string, REGEX_AZ_AZ_NUM_DOWNLINE);
     }
 
     /**
      * 验证是否为由A-Z a-z 0-9 和 下划线"_"组成并且是字母开头的字符串 是:返回true 否:返回false
      */
     public static boolean isAzazNumDownLineAndStartWithEnglish(String string) {
-        return matcher(string, REGEX_AZ_az_Num_DOWNLINE_STARTWITHENGLISH);
+        return matcher(string, REGEX_AZ_AZ_NUM_DOWNLINE_STARTWITHENGLISH);
     }
 
     /**
