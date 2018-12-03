@@ -21,16 +21,42 @@ public class IcoThread extends Thread {
      * 设置该线程已运行完毕，并调用interrupt
      */
     public void close() {
-        this.interrupt();
         this.exitFlag = true;
+        notifyContinue();
     }
 
     /**
      * 标志该线程已超时，并调用interrupt
      */
     public void timeout() {
-        this.interrupt();
         this.timeoutFlag = true;
+        notifyContinue();
+    }
+
+    /** 通知继续运行 */
+    public void notifyContinue() {
+        if (this.getState() == State.WAITING || this.getState() == State.TIMED_WAITING) {
+            synchronized (this) {
+                if (this.getState() == State.WAITING || this.getState() == State.TIMED_WAITING) {
+                    try {
+                        this.notify();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        if (this.getState() == State.BLOCKED) {
+            synchronized (this) {
+                if (this.getState() == State.BLOCKED) {
+                    try {
+                        this.interrupt();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     /**

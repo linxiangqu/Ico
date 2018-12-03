@@ -117,8 +117,12 @@ public class RoundImageView extends ImageView {
         } else {
             w = mDrawable.getIntrinsicWidth();
             h = mDrawable.getIntrinsicHeight();
-            if (w <= 0) w = 1;
-            if (h <= 0) h = 1;
+            if (w <= 0) {
+                w = 1;
+            }
+            if (h <= 0) {
+                h = 1;
+            }
 
             // We are supposed to adjust view bounds to match the aspect
             // ratio of our drawable. See if that is possible.

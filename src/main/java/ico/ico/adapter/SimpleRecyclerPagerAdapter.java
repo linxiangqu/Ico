@@ -27,12 +27,16 @@ public class SimpleRecyclerPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        if (mRecyclerViews[position] != null) return mRecyclerViews[position];
+        if (mRecyclerViews[position] != null) {
+            return mRecyclerViews[position];
+        }
 
         RecyclerView recyclerView = new RecyclerView(mContext);
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         recyclerView.setAdapter(mAdapters[position]);
-        if (this.mOnRecyclerListener != null) this.mOnRecyclerListener.onRecycler(recyclerView);
+        if (this.mOnRecyclerListener != null) {
+            this.mOnRecyclerListener.onRecycler(recyclerView);
+        }
 
 
         mRecyclerViews[position] = recyclerView;

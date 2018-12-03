@@ -27,5 +27,6 @@ public abstract class TypeDispather<T> extends SimpleDispather<T> {
         return (T) new ObjectMapper().readValue(data, mType);
     }
 
+    @Override
     public abstract boolean onCallback(int statusCode, T t);
 }

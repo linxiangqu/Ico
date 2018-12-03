@@ -61,8 +61,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        if (mBitmaps != null) return mBitmaps.length;
-        if (mImages != null) return mImages.length;
+        if (mBitmaps != null) {
+            return mBitmaps.length;
+        }
+        if (mImages != null) {
+            return mImages.length;
+        }
         return 0;
     }
 
@@ -153,7 +157,9 @@ public class ImagePagerAdapter extends PagerAdapter {
     }
 
     public void notifyImageRefresh(int position) {
-        if (imageViews[position] != null) imageViews[position].postInvalidate();
+        if (imageViews[position] != null) {
+            imageViews[position].postInvalidate();
+        }
     }
 
     public OnItemClickListener getOnItemClickListener() {

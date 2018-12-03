@@ -123,6 +123,7 @@ public class Wifi implements Cloneable {
         return this;
     }
 
+    @Override
     public Wifi clone() {
         Wifi wifi = new Wifi();
         wifi.setSsid(this.getSsid());
@@ -134,6 +135,8 @@ public class Wifi implements Cloneable {
     }
 
     public enum WifiType {
-        NONE, WPA, WEP
+        NONE,
+        WPA,
+        WEP
     }
 }

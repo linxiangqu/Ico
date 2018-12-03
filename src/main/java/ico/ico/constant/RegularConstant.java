@@ -53,4 +53,14 @@ public class RegularConstant {
      * 台湾通行证
      */
     public final static String PASSPORT_TAIWAN = "[0-9]{8}|[0-9]{10}";
+    /**
+     * 用于执行网络检查后，判断结果使用的表达式
+     */
+    public final static String NETWORK = "(icmp_seq=\\d+)|(time=\\d+ ms)|(ttl=\\d+)";
+    /**
+     * 用于检查是否包含16
+     */
+    public final static String BINARY_16 = "[0-9a-fA-F]+";
+
+
 }

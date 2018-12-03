@@ -2077,8 +2077,12 @@ public class BaseTabLayout extends HorizontalScrollView {
                 left = right = -1;
             }
             //TODO 新增代码,设置内边距
-            if (tabIndicatorOffsetLeft > 0) left += tabIndicatorOffsetLeft;
-            if (tabIndicatorOffsetRight > 0) right -= tabIndicatorOffsetRight;
+            if (tabIndicatorOffsetLeft > 0) {
+                left += tabIndicatorOffsetLeft;
+            }
+            if (tabIndicatorOffsetRight > 0) {
+                right -= tabIndicatorOffsetRight;
+            }
             setIndicatorPosition(left, right);
         }
 

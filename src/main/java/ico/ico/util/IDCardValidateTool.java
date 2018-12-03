@@ -1,5 +1,7 @@
 package ico.ico.util;
 
+import android.text.TextUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,7 +27,7 @@ public class IDCardValidateTool {
     /**
      * 省、直辖市代码表
      */
-    public static final String cityCode[] = {
+    public static final String CITY_CODE[] = {
             "11", "12", "13", "14", "15", "21", "22", "23", "31", "32", "33", "34", "35", "36", "37", "41",
             "42", "43", "44", "45", "46", "50", "51", "52", "53", "54", "61", "62", "63", "64", "65", "71",
             "81", "82", "91"
@@ -34,14 +36,14 @@ public class IDCardValidateTool {
     /**
      * 每位加权因子
      */
-    public static final int power[] = {
+    public static final int POWER[] = {
             7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2
     };
 
     /**
      * 第18位校检码
      */
-    public static final String verifyCode[] = {
+    public static final String VERIFY_CODE[] = {
             "1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"
     };
     /**
@@ -154,8 +156,9 @@ public class IDCardValidateTool {
                 e.printStackTrace();
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null)
+            if (birthDate != null) {
                 cal.setTime(birthDate);
+            }
             // 获取出生年(完全表现形式,如：2010)
             String sYear = String.valueOf(cal.get(Calendar.YEAR));
             idCard18 = idCard.substring(0, 6) + sYear + idCard.substring(8);
@@ -191,7 +194,7 @@ public class IDCardValidateTool {
         }
         String[] cardval = validateIdCard10(card);
         if (cardval != null) {
-            if (cardval[2].equals("true")) {
+            if (TextUtils.equals("true", cardval[2])) {
                 return true;
             }
         }
@@ -252,8 +255,9 @@ public class IDCardValidateTool {
                 e.printStackTrace();
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null)
+            if (birthDate != null) {
                 cal.setTime(birthDate);
+            }
             if (!valiDate(cal.get(Calendar.YEAR), Integer.valueOf(birthCode.substring(2, 4)),
                     Integer.valueOf(birthCode.substring(4, 6)))) {
                 return false;
@@ -284,10 +288,10 @@ public class IDCardValidateTool {
             info[0] = "台湾";
             System.out.println("11111");
             String char2 = idCard.substring(1, 2);
-            if (char2.equals("1")) {
+            if (TextUtils.equals("1",char2)) {
                 info[1] = "M";
                 System.out.println("MMMMMMM");
-            } else if (char2.equals("2")) {
+            } else if (TextUtils.equals("2",char2)) {
                 info[1] = "F";
                 System.out.println("FFFFFFF");
             } else {
@@ -363,7 +367,8 @@ public class IDCardValidateTool {
             sum = sum + Integer.valueOf(c + "") * iflag;
             iflag--;
         }
-        if (end.toUpperCase().equals("A")) {
+
+        if (TextUtils.equals("A",end.toUpperCase())) {
             sum = sum + 10;
         } else {
             sum = sum + Integer.valueOf(end);
@@ -398,11 +403,11 @@ public class IDCardValidateTool {
      */
     public static int getPowerSum(int[] iArr) {
         int iSum = 0;
-        if (power.length == iArr.length) {
+        if (POWER.length == iArr.length) {
             for (int i = 0; i < iArr.length; i++) {
-                for (int j = 0; j < power.length; j++) {
+                for (int j = 0; j < POWER.length; j++) {
                     if (i == j) {
-                        iSum = iSum + iArr[i] * power[j];
+                        iSum = iSum + iArr[i] * POWER[j];
                     }
                 }
             }
@@ -582,7 +587,7 @@ public class IDCardValidateTool {
      * @return 提取的数字。
      */
     public static boolean isNum(String val) {
-        return val == null || "".equals(val) ? false : val.matches("^[0-9]*$");
+        return val == null || TextUtils.equals("",val) ? false : val.matches("^[0-9]*$");
     }
 
     /**

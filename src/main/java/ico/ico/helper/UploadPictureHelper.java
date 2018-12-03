@@ -80,7 +80,7 @@ public class UploadPictureHelper {
                             return;
                         }
                         //初始化文件保存路径
-                        tmpFile = new File(Environment.getExternalStorageDirectory() + "/" + mActivity.getPackageName() + "/" + "IMG_" + new Date().getTime() + ".png");
+                        tmpFile = new File(Environment.getExternalStorageDirectory() + "/" + mActivity.getPackageName() + "/" + "IMG_" + System.currentTimeMillis() + ".png");
                         try {
                             if (mFragment != null) {
                                 mFragment.startActivityForResult(Common.getIntentByCamera(tmpFile), RC_CAMERA);

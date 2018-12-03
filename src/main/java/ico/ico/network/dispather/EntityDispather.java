@@ -28,5 +28,6 @@ public abstract class EntityDispather<T> extends SimpleDispather<T> {
         return (T) new ObjectMapper().readValue(data, mEntityClass);
     }
 
+    @Override
     public abstract boolean onCallback(int statusCode, T t);
 }

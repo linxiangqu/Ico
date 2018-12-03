@@ -556,7 +556,9 @@ public class DragGridView extends GridView implements AbsListView.OnScrollListen
             return this;
         }
         //若未修改则直接返回
-        if (this.isDragModeing == isDragModeing) return this;
+        if (this.isDragModeing == isDragModeing) {
+            return this;
+        }
         this.isDragModeing = isDragModeing;
         //根据当前拖拽状态进行不同的UI处理
         if (isDraging) {//初始化拖拽镜像视图，添加进窗口
@@ -593,7 +595,9 @@ public class DragGridView extends GridView implements AbsListView.OnScrollListen
             return this;
         }
         //若状态未改变则直接返回
-        if (this.isDraging == isDraging) return this;
+        if (this.isDraging == isDraging) {
+            return this;
+        }
         this.isDraging = isDraging;
         //在状态改变后调用监听器,若监听器返回true则直接返回
         if ((onDragingChangedListener != null) && (onDragingChangedListener.onDragingChanged(dragGridView, isDraging))) {
@@ -753,7 +757,7 @@ public class DragGridView extends GridView implements AbsListView.OnScrollListen
                 }
                 publishProgress(scrollY);
                 try {
-                    Thread.currentThread().sleep(scrollInterval);
+                    this.wait(scrollInterval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

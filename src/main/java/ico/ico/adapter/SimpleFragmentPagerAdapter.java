@@ -55,7 +55,9 @@ public class SimpleFragmentPagerAdapter extends android.support.v4.app.FragmentP
 
     @Override
     public int getCount() {
-        if (fragments == null) return 0;
+        if (fragments == null) {
+            return 0;
+        }
         return fragments.size();
     }
 

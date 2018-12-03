@@ -105,9 +105,9 @@ public class WifiMgr {
         // 获取搜索结果
         wifiMgr.startScan();
         List<ScanResult> tmpList = wifiMgr.getScanResults();
-        List<Wifi> list = new ArrayList<Wifi>();
+        List<Wifi> list = new ArrayList<>();
         for (ScanResult re : tmpList) {
-            if (re.BSSID.equals(bssid)) {
+            if (TextUtils.equals(re.BSSID,bssid)) {
                 wifi = new Wifi(re);
                 wifi.setPassword(pwdMap.get(re.BSSID));
                 break;
@@ -130,7 +130,7 @@ public class WifiMgr {
         List<Wifi> tmpList = WifiMgr.getScanResult(context);
         // 筛选为设备的wifi点
         for (Wifi tmpWifi : tmpList) {
-            if (tmpWifi.getBssid().equals(wifi.getBssid())) {
+            if (TextUtils.equals(tmpWifi.getBssid(),wifi.getBssid())) {
                 return true;
             }
         }
@@ -328,7 +328,7 @@ public class WifiMgr {
                 .getConfiguredNetworks();
         List<Integer> netIds = new ArrayList<Integer>();
         for (WifiConfiguration tmp : configuredNetworks) {
-            if ((tmp.BSSID != null) && (tmp.BSSID.equals(bssid))) {
+            if ((tmp.BSSID != null) && (TextUtils.equals(tmp.BSSID,bssid))) {
                 netIds.add(tmp.networkId);
             }
         }
@@ -398,7 +398,7 @@ public class WifiMgr {
     public static Boolean isConnect(Context context, Wifi wifi) {
         Wifi _wifi = WifiMgr.getCurrWifi(context);
         // 判断是否已连接上指定的Wifi
-        if ((_wifi != null) && (!TextUtils.isEmpty(_wifi.getBssid())) && (_wifi.getBssid().equals(wifi.getBssid())) && (!TextUtils.isEmpty(_wifi.getIp())) && (!_wifi.getIp().equals("0.0.0.0"))) {
+        if ((_wifi != null) && (!TextUtils.isEmpty(_wifi.getBssid())) && (TextUtils.equals(_wifi.getBssid(),wifi.getBssid())) && (!TextUtils.isEmpty(_wifi.getIp())) && (!TextUtils.equals(_wifi.getIp(),"0.0.0.0"))) {
             return true;
         }
         return false;

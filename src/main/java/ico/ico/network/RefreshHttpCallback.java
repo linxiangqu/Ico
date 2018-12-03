@@ -29,6 +29,7 @@ public class RefreshHttpCallback implements IHttpCallback {
      *
      * @param context
      */
+    @Override
     public void onReady(Context context) {
         mSwipeRefreshLayout.setRefreshing(true);
     }
@@ -39,6 +40,7 @@ public class RefreshHttpCallback implements IHttpCallback {
      *
      * @param context
      */
+    @Override
     public void onFinish(Context context) {
         mSwipeRefreshLayout.setRefreshing(false);
         if (endless != null) {
@@ -61,6 +63,7 @@ public class RefreshHttpCallback implements IHttpCallback {
      *
      * @param context
      */
+    @Override
     public void onFailure(Context context, int statusCode, Throwable throwable) {
         CharSequence text = HttpUtil.getCodeMsg(context, statusCode, throwable);
         CharSequence content = TextUtils.isEmpty(text) ?/* getResources().getString(R.string.ico_application_error)*/"程序出错，请稍候再试!" : text;

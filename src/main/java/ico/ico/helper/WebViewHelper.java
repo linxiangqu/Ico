@@ -1,6 +1,7 @@
 package ico.ico.helper;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.Fragment;
@@ -13,7 +14,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import ico.ico.util.StringUtil;
 import ico.ico.util.log;
 
 /**
@@ -108,7 +108,9 @@ public class WebViewHelper {
         }
 
         String js = genJsCode(function, params);
-        if (!StringUtil.isEmpty(js)) execJsCode(webView, js);
+        if (!StringUtil.isEmpty(js)) {
+            execJsCode(webView, js);
+        }
         log.d("execJsFunction,执行js函数，" + js, TAG);
         return js;
     }
@@ -128,7 +130,9 @@ public class WebViewHelper {
         }
 
         String _js = js;
-        if (!js.startsWith(PREFIX_JS)) _js = PREFIX_JS + js;
+        if (!js.startsWith(PREFIX_JS)) {
+            _js = PREFIX_JS + js;
+        }
         webView.loadUrl(_js);
         log.d("execJsCode,执行js代码，" + js, TAG);
     }
@@ -167,11 +171,15 @@ public class WebViewHelper {
         if (params != null || params.length != 0) {
             for (int i = 0; i < params.length; i++) {
                 //空指针判断
-                if (params[i] == null || StringUtil.isEmpty(params[i].toString())) continue;
+                if (params[i] == null || StringUtil.isEmpty(params[i].toString())) {
+                    continue;
+                }
 
                 String param = params[i].toString().trim();
                 //有数据，拼接逗号
-                if (_params.length() != 0) _params.append(",");
+                if (_params.length() != 0) {
+                    _params.append(",");
+                }
                 //拼接参数
                 _params.append(param);
             }

@@ -72,6 +72,7 @@ public abstract class BaseDialogFrag extends DialogFragment {
         mDialog.setContentView(view);
     }
 
+    @Override
     public Dialog getDialog() {
         if (mDialog == null) {
             return super.getDialog();

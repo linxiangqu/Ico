@@ -27,6 +27,7 @@ android {
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -43,7 +44,6 @@ android {
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.12'
     api 'com.fasterxml.jackson.core:jackson-databind:2.7.1'
     api 'com.fasterxml.jackson.core:jackson-core:2.7.1'
     api 'com.fasterxml.jackson.core:jackson-annotations:2.7.1'
@@ -95,7 +95,7 @@ dependencies {
     //侧滑删除   https://github.com/daimajia/AndroidSwipeLayout
     api 'com.daimajia.swipelayout:library:1.2.0@aar'
     //butterknife https://github.com/JakeWharton/butterknife
-    implementation 'com.jakewharton:butterknife:9.0.0-rc1'
+    api 'com.jakewharton:butterknife:9.0.0-rc1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
 }
 /*同步support包版本*/

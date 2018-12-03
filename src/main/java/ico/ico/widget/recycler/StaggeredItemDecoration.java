@@ -11,6 +11,7 @@ public class StaggeredItemDecoration extends RecyclerView.ItemDecoration {
         this.space = space;
     }
 
+    @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         outRect.top = this.space;
         outRect.left = this.space;

@@ -106,14 +106,24 @@ class CoordinateConverter {
             double[] tmp = wgs2GCJ(wgsLat, wgsLon);
             dLat = tmp[0] - gcjLat;
             dLon = tmp[1] - gcjLon;
-            if ((Math.abs(dLat) < threshold) && (Math.abs(dLon) < threshold)) break;
+            if ((Math.abs(dLat) < threshold) && (Math.abs(dLon) < threshold)) {
+                break;
+            }
 
-            if (dLat > 0) pLat = wgsLat;
-            else mLat = wgsLat;
-            if (dLon > 0) pLon = wgsLon;
-            else mLon = wgsLon;
+            if (dLat > 0) {
+                pLat = wgsLat;
+            } else {
+                mLat = wgsLat;
+            }
+            if (dLon > 0) {
+                pLon = wgsLon;
+            } else {
+                mLon = wgsLon;
+            }
 
-            if (++i > 10000) break;
+            if (++i > 10000) {
+                break;
+            }
         }
         double[] latlon = new double[2];
         latlon[0] = wgsLat;
@@ -127,8 +137,12 @@ class CoordinateConverter {
         double x = Math.cos(latA * Math.PI / 180) * Math.cos(latB * Math.PI / 180) * Math.cos((logA - logB) * Math.PI / 180);
         double y = Math.sin(latA * Math.PI / 180) * Math.sin(latB * Math.PI / 180);
         double s = x + y;
-        if (s > 1) s = 1;
-        if (s < -1) s = -1;
+        if (s > 1) {
+            s = 1;
+        }
+        if (s < -1) {
+            s = -1;
+        }
         double alpha = Math.acos(s);
         double distance = alpha * earthR;
         return distance;
@@ -150,8 +164,12 @@ class CoordinateConverter {
     }
 
     public static boolean outOfChina(double lat, double lon) {
-        if (lon < 72.004 || lon > 137.8347) return true;
-        if (lat < 0.8293 || lat > 55.8271) return true;
+        if (lon < 72.004 || lon > 137.8347) {
+            return true;
+        }
+        if (lat < 0.8293 || lat > 55.8271) {
+            return true;
+        }
         return false;
     }
 

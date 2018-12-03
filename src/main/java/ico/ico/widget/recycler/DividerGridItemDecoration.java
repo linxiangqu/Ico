@@ -99,13 +99,17 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
 
             /*首先检查横向有几条间距*/
             int horizontalCount = 0;//横向间距数
-            if ((mDividerLayout & LAYOUT_LEFT) == LAYOUT_LEFT) horizontalCount++;
+            if ((mDividerLayout & LAYOUT_LEFT) == LAYOUT_LEFT) {
+                horizontalCount++;
+            }
             if ((mDividerLayout & LAYOUT_CENTER) == LAYOUT_CENTER) {
                 if (spanCount > 1) {
                     horizontalCount += spanCount - 1;
                 }
             }
-            if ((mDividerLayout & LAYOUT_RIGHT) == LAYOUT_RIGHT) horizontalCount++;
+            if ((mDividerLayout & LAYOUT_RIGHT) == LAYOUT_RIGHT) {
+                horizontalCount++;
+            }
             //计算所有左右间距总的宽度
             int horizontalTotalWidth = horizontalCount * mDividerWidth;
             //计算每个item需要承担的左右间距
@@ -113,13 +117,17 @@ public class DividerGridItemDecoration extends RecyclerView.ItemDecoration {
 
             /*然后检查竖向有几条间距*/
             int verticalCount = 0;//竖向间距数
-            if ((mDividerLayout & LAYOUT_TOP) == LAYOUT_TOP) verticalCount++;
+            if ((mDividerLayout & LAYOUT_TOP) == LAYOUT_TOP) {
+                verticalCount++;
+            }
             if ((mDividerLayout & LAYOUT_CENTER) == LAYOUT_CENTER) {
                 if (rowCount > 1) {
                     verticalCount += rowCount - 1;
                 }
             }
-            if ((mDividerLayout & LAYOUT_BOTTOM) == LAYOUT_BOTTOM) verticalCount++;
+            if ((mDividerLayout & LAYOUT_BOTTOM) == LAYOUT_BOTTOM) {
+                verticalCount++;
+            }
             //计算所有上下间距总的高度
             int verticalTotalHeight = verticalCount * mDividerHeight;
             //计算每个item需要承担的上下间距

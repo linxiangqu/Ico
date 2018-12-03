@@ -28,16 +28,6 @@ public final class DateUtil {
     }
 
     /**
-     * 获取当前时间的毫秒类型
-     *
-     * @return Long
-     */
-    public static Long getCurrentTimes() {
-        Timestamp time = new Timestamp(new Date().getTime());
-        return time.getTime();
-    }
-
-    /**
      * 根据指定的字符串和时间格式进行转化,获取对应的毫秒值
      *
      * @param time
@@ -82,7 +72,7 @@ public final class DateUtil {
      * @return Timestamp
      */
     public static Timestamp getCurrentTime() {
-        return new Timestamp(new Date().getTime());
+        return new Timestamp(System.currentTimeMillis());
     }
 
     /**

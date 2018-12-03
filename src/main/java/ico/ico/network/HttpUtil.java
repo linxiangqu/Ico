@@ -73,10 +73,11 @@ public class HttpUtil {
         try {
             final RequestBody copy = request;
             final Buffer buffer = new Buffer();
-            if (copy != null)
+            if (copy != null) {
                 copy.writeTo(buffer);
-            else
+            } else {
                 return "";
+            }
             return buffer.readUtf8();
         } catch (final IOException e) {
             return "did not work";

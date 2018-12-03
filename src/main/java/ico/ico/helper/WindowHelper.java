@@ -1,4 +1,4 @@
-package ico.ico.util;
+package ico.ico.helper;
 
 import android.graphics.Rect;
 import android.os.Build;

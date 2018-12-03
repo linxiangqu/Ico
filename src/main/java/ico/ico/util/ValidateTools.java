@@ -31,7 +31,7 @@ public abstract class ValidateTools {
     private static final String REGEX_UPPERCASE_ONLY = "[A-Z]+";
 
     // 正则,匹配a-z A-Z(英文大写或小写)
-    private static final String REGEX_LowerOrUpperCase = "[A-Za-z]+";
+    private static final String REGEX_LOWER_OR_UPPER_CASE = "[A-Za-z]+";
 
     // 正则,匹配0-9(数字)
     private static final String REGEX_NUM_ONLY = "[0-9]+";
@@ -42,10 +42,10 @@ public abstract class ValidateTools {
     private static final String REGEX_ZERO_OR_NOTSTARTWITHZERO = "(0|[1-9][0-9]*)";
 
     // 正则,只能由a-z A-Z 0-9 组成
-    private static final String REGEX_AZ_az_Num_DOWNLINE = "[a-zA-Z0-9]+";
+    private static final String REGEX_AZ_AZ_NUM_DOWNLINE = "[a-zA-Z0-9]+";
 
     // 正则,匹配必须是英文字母开头,只能由a-z A-Z 0-9 和 下划线"_"组成
-    private static final String REGEX_AZ_az_Num_DOWNLINE_STARTWITHENGLISH = "[a-zA-Z][a-zA-Z0-9_]+";
+    private static final String REGEX_AZ_AZ_NUM_DOWNLINE_STARTWITHENGLISH = "[a-zA-Z][a-zA-Z0-9_]+";
 
     // 正则,验证是否含有特殊的字符(^%&',;=?$\")
     private static final String REGEX_HAVE_SOECIAL_CHAR = "[^^%&'=$\\x22]+";

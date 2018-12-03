@@ -76,7 +76,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,6 +85,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ico.ico.constant.CmdConstant;
+import ico.ico.constant.RegularConstant;
 import ico.ico.constant.RingTypeEnum;
 
 import static android.content.Context.VIBRATOR_SERVICE;
@@ -199,7 +199,7 @@ public class Common {
      */
     public static int random(int x) {
         Random random = new Random();
-        random.setSeed(new Date().getTime());
+        random.setSeed(System.currentTimeMillis());
         return (random.nextInt(x) + 1);
     }
 
@@ -710,7 +710,7 @@ public class Common {
             @Override
             public void run() {
                 String cmdResult = Common.execCmd(String.format("ping -c 1 -W %d t.weipusq.com", timeout / 1000));
-                Pattern pattern = Pattern.compile("(icmp_seq=\\d+)|(time=\\d+ ms)|(ttl=\\d+)", Pattern.CASE_INSENSITIVE);
+                Pattern pattern = Pattern.compile(RegularConstant.NETWORK, Pattern.CASE_INSENSITIVE);
                 Matcher matcher = pattern.matcher(cmdResult);
                 if (!TextUtils.isEmpty(cmdResult) && matcher.find()) {
                     isNetEnable[0] = true;
@@ -759,8 +759,12 @@ public class Common {
      */
     public static void setViewWH(View v, Integer width, Integer height) {
         ViewGroup.LayoutParams lp = v.getLayoutParams();
-        if (width != null) lp.width = width;
-        if (height != null) lp.height = height;
+        if (width != null) {
+            lp.width = width;
+        }
+        if (height != null) {
+            lp.height = height;
+        }
         v.setLayoutParams(lp);
     }
 
@@ -1550,7 +1554,9 @@ public class Common {
      * @return
      */
     public static String bytes2Int16(String joinStr, byte... buffers) {
-        if (joinStr == null) joinStr = "";
+        if (joinStr == null) {
+            joinStr = "";
+        }
         StringBuilder sb = new StringBuilder("");
         for (int i = 0; i < buffers.length; i++) {
             sb.append(byte2Int16(buffers[i]));
@@ -1593,10 +1599,12 @@ public class Common {
      * @return
      */
     public static byte[] hexstr2Bytes(String joinStr, String mac) throws IllegalArgumentException {
+        if (StringUtil.isEmpty(mac)) {
+            return null;
+        }
         mac = mac.toUpperCase();
-        //检查数据中是否存在16进制以外的数字
-        Pattern pattern = Pattern.compile("[GHIJKLMNOPQRSTUVWXYZ]+");
-        if (pattern.matcher(mac).find()) {
+        //检查数据中是否符合16进制格式
+        if (!mac.matches(RegularConstant.BINARY_16)) {
             throw new IllegalArgumentException("mac中存在16进制以外的英文,mac=" + mac);
         }
         if (mac.length() != 2) {
@@ -2416,7 +2424,7 @@ public class Common {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         //通过摘要器对字符串的二进制字节数组进行hash计算
         byte[] digest = messageDigest.digest(text.getBytes());
-        return Common.bytes2Int16("",digest);
+        return Common.bytes2Int16("", digest);
     }
 
     /**

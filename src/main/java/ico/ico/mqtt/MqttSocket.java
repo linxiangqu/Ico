@@ -293,7 +293,12 @@ public class MqttSocket {
      * 用于表示当前的MQTT连接状态
      */
     public enum ConnectState {
-        UNCONNECT, CONNECTING, CONNECTED
+        /** 标识未连接 */
+        UNCONNECT,
+        /** 连接中 */
+        CONNECTING,
+        /** 连接成功 */
+        CONNECTED
     }
 
     class MqttCallbackIco implements MqttCallbackExtended {

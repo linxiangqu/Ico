@@ -32,7 +32,7 @@ import ico.ico.constant.ImageLoaderPrefixConstant;
 
 public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extends RecyclerView.Adapter<HOLDER> {
 
-    public final static DisplayImageOptions.Builder build = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true);
+    public final static DisplayImageOptions.Builder BUILD = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true);
 
     protected int selectPosition = -1;
     protected HashSet<Integer> selectPositions = new HashSet<>();
@@ -125,17 +125,23 @@ public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extend
     }
 
     public boolean contains(DATA _data) {
-        if (this.data == null) return false;
+        if (this.data == null) {
+            return false;
+        }
         return this.data.contains(_data);
     }
 
     public boolean remove(DATA _data) {
-        if (this.data == null) return true;
+        if (this.data == null) {
+            return true;
+        }
         return this.data.remove(_data);
     }
 
     public BaseAdapter addData(List<DATA> data) {
-        if (this.data == null) this.data = new ArrayList<>();
+        if (this.data == null) {
+            this.data = new ArrayList<>();
+        }
         this.data.addAll(data);
         return this;
     }
@@ -165,8 +171,12 @@ public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extend
     public void setSelectPosition(int _selectPosition) {
         int __selectPosition = selectPosition;
         selectPosition = _selectPosition;
-        if (__selectPosition != -1) notifyItemChanged(__selectPosition);
-        if (selectPosition != -1) notifyItemChanged(selectPosition);
+        if (__selectPosition != -1) {
+            notifyItemChanged(__selectPosition);
+        }
+        if (selectPosition != -1) {
+            notifyItemChanged(selectPosition);
+        }
     }
 
     public void clearSelectPosition() {

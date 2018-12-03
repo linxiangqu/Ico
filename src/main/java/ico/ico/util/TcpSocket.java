@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,43 +16,41 @@ import java.util.List;
  */
 
 public class TcpSocket extends IcoThread {
-    //常量
-    public final static int TCPSOCKET_CONNECT_SUCCESS = 100;
-    public final static int TCPSOCKET_CONNECT_FAIL = 101;
-    public final static int TCPSOCKET_RECEIVE = 102;
-    public final static int TCPSOCKET_TIMEOUT = 103;
     /**
      * 实体参数
      */
     //TCP连接对象和IO流
-    private Socket socket = null;
-    private BufferedInputStream input = null;
-    private BufferedOutputStream output = null;
+    private Socket mSocket = null;
+    private BufferedInputStream mInput = null;
+    private BufferedOutputStream mOutput = null;
     //TCP连接对象的IP地址和端口
-    private String ip;
-    private int port;
+    private String mIp;
+    private int mPort;
     //TCP连接超时时间
-    private Long timeout = 20000l;
+    private Long mConnectTimeout = 20000L;
     //TCP连接次数上限，超过该次数将调用回调函数connectFail
-    private int times = Integer.MAX_VALUE;
+    private int mMaxConnectTimes = 10;
     //TCP连接数据接收超时时间
-    private Long sotimeout = -1l;
+    private Long mReceiveSotimeout = -1L;
     //TCP回调函数
-    private TcpCallback tcpCallback;
+    private TcpCallback mTcpCallback;
     //要发送的数据
-    private List<byte[]> data = new ArrayList<byte[]>();
+    private List<byte[]> mDataBuffer = new ArrayList<>();
     //心跳包相关
+    /** 是否开启心跳 */
     private boolean isHeart = false;
-    private byte[] heartData;
-    private Long heartInterval = 0l;
+    /** 心跳数据 */
+    private byte[] mHeartData;
+    /** 心跳包发送的间隔时间 */
+    private Long mHeartInterval = 0L;
     //发送线程
-    private SendThread sendThread;
+    private SendThread mSendThread;
     //标记Udp是否已连接
     private boolean isConnected = false;
     // 最后一次发送命令的时间
-    private long lastSendTime;
+    private long mLastSendTime;
     // 每次命令需间隔时间
-    private Long interval = 300l;
+    private Long mInterval = 300L;
 
     /**
      * 创建一个TCP连接对象，不使用心跳机制
@@ -66,14 +63,14 @@ public class TcpSocket extends IcoThread {
      * @param tcpCallback 回调函数
      */
     public TcpSocket(String ip, int port, Long timeout, Long sotimeout, int times, TcpCallback tcpCallback) {
-        this.ip = ip;
-        this.port = port;
+        this.mIp = ip;
+        this.mPort = port;
         if (timeout > 0) {
-            this.timeout = timeout;
+            this.mConnectTimeout = timeout;
         }
-        this.sotimeout = sotimeout;
-        this.tcpCallback = tcpCallback;
-        this.times = times;
+        this.mReceiveSotimeout = sotimeout;
+        this.mTcpCallback = tcpCallback;
+        this.mMaxConnectTimes = times;
     }
 
     /**
@@ -91,25 +88,8 @@ public class TcpSocket extends IcoThread {
     public TcpSocket(String ip, int port, Long timeout, Long sotimeout, int times, TcpCallback tcpCallback, byte[] heartData, Long heartInterval) {
         this(ip, port, timeout, sotimeout, times, tcpCallback);
         isHeart = true;
-        this.heartInterval = heartInterval;
-        this.heartData = heartData;
-    }
-
-    /**
-     * 计算最后一次发送的时间,若间隔过小则睡眠相差的毫秒数
-     *
-     * @param thread
-     * @throws InterruptedException
-     */
-    public static void calcLastSendTime(IcoThread thread, long lastSendTime, long interval)
-            throws InterruptedException {
-        if (lastSendTime == 0l || interval == 0l) {
-            return;
-        }
-        Long _intervel = new Date().getTime() - lastSendTime;
-        if (_intervel < interval) {
-            thread.sleep(interval - _intervel);
-        }
+        this.mHeartInterval = heartInterval;
+        this.mHeartData = heartData;
     }
 
     /**
@@ -132,80 +112,61 @@ public class TcpSocket extends IcoThread {
 
     @Override
     public void run() {
-        //进行TCP连接
+        /* 创建和进行TCP连接 */
         for (int i = 0; (!isClosed()); i++) {
             try {
-                log.i(String.format("TCP正在建立连接%d,ip:%s,port:%d", i, ip, port), TcpSocket.class.getSimpleName(), "run");
-                Socket _socket = TcpSocket.createSocket(ip, port, timeout);
-                log.w(String.format("TCP建立连接成功%d,ip:%s,port:%d", i, ip, port), TcpSocket.class.getSimpleName(), "run");
-                socket = _socket;
+                log.d(String.format("TCP正在建立连接%d,ip:%s,port:%d", i, mIp, mPort), TcpSocket.class.getSimpleName());
+                Socket _socket = TcpSocket.createSocket(mIp, mPort, mConnectTimeout);
+                log.d(String.format("TCP建立连接成功%d,ip:%s,port:%d", i, mIp, mPort), TcpSocket.class.getSimpleName());
+                //设置超时
+                if (mReceiveSotimeout != -1) {
+                    _socket.setSoTimeout(mReceiveSotimeout.intValue());
+                }
+                // 获取输入输出
+                BufferedOutputStream _output = new BufferedOutputStream(_socket.getOutputStream());
+                BufferedInputStream _input = new BufferedInputStream(_socket.getInputStream());
+                mSocket = _socket;
+                mOutput = _output;
+                mInput = _input;
+                setConnected(true);
                 break;
             } catch (Exception e) {
-                log.e(String.format("TCP建立连接失败%d,ip:%s,port:%d,Exception:" + e.toString(), i, ip, port) + i, TcpSocket.class.getSimpleName(), "run");
-                if (i == times - 1) {
-                    tcpCallback.connectFail(this);
+                log.ee(String.format("TCP建立连接失败%d,ip:%s,port:%d,Exception:" + e.toString(), i, mIp, mPort) + i, TcpSocket.class.getSimpleName());
+                if (i == mMaxConnectTimes - 1) {
+                    mTcpCallback.onConnectFail(this);
                     close();
                     return;
                 }
                 try {
-                    mThread.sleep(500l);
+                    sleep(500L);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
             }
         }
-        // 设置数据接收超时时间
-        if (sotimeout != -1) {
-            try {
-                socket.setSoTimeout(sotimeout.intValue());
-            } catch (Exception e) {
-//                    e.printStackTrace();
-                log.e(String.format("TCP设置数据接收超时时间异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "run");
-            }
-        }
 
-        try {
-            // 获取输入输出
-            output = new BufferedOutputStream(socket.getOutputStream());
-            input = new BufferedInputStream(socket.getInputStream());
-        } catch (Exception e) {
-//                e.printStackTrace();
-            log.e(String.format("TCP获取IO流失败，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "run");
-            close();
-            return;
-        }
-        setConnected(true);
-        // 读取返回
+        /* 读取数据 */
         while (!isClosed()) {
-            byte[] buffer = new byte[0];
+            byte[] buffer = null;
             try {
-                byte[] bytes = new byte[1024];
-                log.i(String.format("TCP正在接收数据，ip：%s，port：%d", ip, port), TcpSocket.class.getSimpleName(), "run");
-                int len = input.read(bytes);
+                buffer = new byte[1024];
+                log.d(String.format("TCP正在接收数据，ip：%s，port：%d", mIp, mPort), TcpSocket.class.getSimpleName());
+                int len = mInput.read(buffer);
 
                 if (len == -1) {
                     throw new IOException("len==-1");
                 }
-                buffer = new byte[len];
-                System.arraycopy(bytes, 0, buffer, 0, len);
-
-
-                String d = "";
-                for (byte b : buffer) {
-                    d += Common.byte2Int16(b).toUpperCase() + " ";
-                }
-                log.w(String.format("TCP接收数据成功，ip：%s，port：%d，数据长度：%d；数据：" + d, ip, port, len), TcpSocket.class.getSimpleName(), "run");
+                mTcpCallback.onReceive(buffer);
+                log.d(String.format("TCP接收数据成功，ip：%s，port：%d，数据长度：%d；数据：%s", mIp, mPort, len, Common.bytes2Int16(" ", buffer)), TcpSocket.class.getSimpleName());
             } catch (IOException e) {
 //                e.printStackTrace();
-                log.e(String.format("TCP连接IO流异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "run");
+                log.ee(String.format("TCP连接IO流异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
                 close();
-                tcpCallback.connectDisconnect(this);
+                mTcpCallback.connectDisconnect(this);
             } catch (Exception e) {
 //                e.printStackTrace();
-                log.e(String.format("TCP数据接收异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "run");
-                continue;
+                log.ee(String.format("TCP数据接收异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
-            tcpCallback.receive(buffer);
         }
     }
 
@@ -216,36 +177,35 @@ public class TcpSocket extends IcoThread {
     public void close() {
         super.close();
         setConnected(false);
-        if (sendThread != null) {
-            sendThread.close();
+        if (mSendThread != null) {
+            mSendThread.close();
         }
-        if (input != null) {
+        if (mInput != null) {
             try {
-                input.close();
-                input = null;
+                mInput.close();
+                mInput = null;
             } catch (Exception e) {
-                log.e(String.format("TCP输入流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "close");
+                log.ee(String.format("TCP输入流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
-        if (output != null) {
+        if (mOutput != null) {
             try {
-                output.close();
-                output = null;
+                mOutput.close();
+                mOutput = null;
             } catch (Exception e) {
-                log.e(String.format("TCP输出流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "close");
+                log.ee(String.format("TCP输出流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
-        if (socket != null) {
+        if (mSocket != null) {
             try {
-                socket.close();
-                socket = null;
+                mSocket.close();
+                mSocket = null;
             } catch (Exception e) {
-                log.e(String.format("TCP关闭异常，ip:%s,port:%d，Exception:" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), "close");
+                log.ee(String.format("TCP关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
-        log.e(String.format("TCP连接断开,ip:%s,port:%d", ip, port), TcpSocket.class.getSimpleName(), "close");
+        log.d(String.format("TCP连接断开,ip:%s,port:%d", mIp, mPort), TcpSocket.class.getSimpleName());
     }
-
 
     /**
      * 将数据添加到数据队列中并立即发送
@@ -253,7 +213,7 @@ public class TcpSocket extends IcoThread {
      * @param buffer
      */
     public void send(byte[] buffer) {
-        data.add(buffer);
+        mDataBuffer.add(buffer);
         send();
     }
 
@@ -263,7 +223,9 @@ public class TcpSocket extends IcoThread {
      * @param buffer
      */
     public void addData(byte[] buffer) {
-        data.add(buffer);
+        synchronized (mDataBuffer) {
+            mDataBuffer.add(buffer);
+        }
     }
 
     /**
@@ -272,21 +234,24 @@ public class TcpSocket extends IcoThread {
      * @param list
      */
     public void addDatas(List<byte[]> list) {
-        data.addAll(list);
+        synchronized (mDataBuffer) {
+            mDataBuffer.addAll(list);
+        }
     }
-
 
     /**
      * 立即发送数据队列中的数据
      */
     public void send() {
-        if (sendThread == null || sendThread.isClosed()) {
-            sendThread = new SendThread();
-            sendThread.start();
+        if (mSendThread == null || mSendThread.isClosed()) {
+            mSendThread = new SendThread();
+            mSendThread.start();
         } else {
-            sendThread.interrupt();
+            mSendThread.notifyContinue();
         }
     }
+
+    //region ***************************************************************************************开启和关闭心跳机制
 
     /**
      * 开启心跳包
@@ -295,14 +260,14 @@ public class TcpSocket extends IcoThread {
      * @param heartInterval 心跳包间隔时间
      */
     public void startHeart(byte[] buffer, Long heartInterval) {
-        this.heartInterval = heartInterval;
-        heartData = buffer;
+        this.mHeartInterval = heartInterval;
+        mHeartData = buffer;
         if (!isHeart) {
             isHeart = true;
             //不为null&&已关闭则重新开启
-            if (sendThread == null || sendThread.isClosed()) {
-                sendThread = new SendThread();
-                sendThread.start();
+            if (mSendThread == null || mSendThread.isClosed()) {
+                mSendThread = new SendThread();
+                mSendThread.start();
             }
         }
     }
@@ -313,35 +278,31 @@ public class TcpSocket extends IcoThread {
     public void stopHeart() {
         isHeart = false;
     }
+    //endregion
 
-
-    /**
-     * **********************************************************************************GETSET
-     */
-
-
+    //region ***************************************************************************************GETSET
     public Socket getSocket() {
-        return socket;
+        return mSocket;
     }
 
     public void setSocket(Socket socket) {
-        this.socket = socket;
+        this.mSocket = socket;
     }
 
     public TcpCallback getTcpCallback() {
-        return tcpCallback;
+        return mTcpCallback;
     }
 
-    public void setTcpCallback(TcpCallback tcpCallback) {
-        this.tcpCallback = tcpCallback;
+    public void setmTcpCallback(TcpCallback tcpCallback) {
+        this.mTcpCallback = tcpCallback;
     }
 
     public String getIp() {
-        return ip;
+        return mIp;
     }
 
     public void setIp(String ip) {
-        this.ip = ip;
+        this.mIp = ip;
     }
 
     public boolean isConnected() {
@@ -349,16 +310,17 @@ public class TcpSocket extends IcoThread {
     }
 
     /**
-     * 设置当前连接状态，若设置true则会调用回调函数{@link ico.ico.util.TcpCallback} connectSuccess
+     * 设置当前连接状态，若设置true则会调用回调函数{@link ico.ico.util.TcpCallback} onConnectSuccess
      *
      * @param isConnected
      */
     public void setConnected(boolean isConnected) {
         this.isConnected = isConnected;
         if (isConnected) {
-            tcpCallback.connectSuccess(this);
+            mTcpCallback.onConnectSuccess(this);
         }
     }
+    //endregion
 
     /**
      * 数据发送线程
@@ -370,72 +332,113 @@ public class TcpSocket extends IcoThread {
     public class SendThread extends IcoThread {
         @Override
         public void run() {
-            synchronized (data) {
-                while (!SendThread.this.isClosed()) {
-                    if (data.size() == 0) {
+            while (!SendThread.this.isClosed()) {
+                /* 用于临时保存数据的集合 */
+                List<byte[]> _data = new ArrayList<>();
+                /* 在同步块内检查数据，没有数据则执行心跳处理，有数据则将数据存储到_data,然后在第二大块将_data依次发送 */
+                synchronized (mDataBuffer) {
+                    //检查有没有数据
+                    if (mDataBuffer.size() == 0) {
+                        //检查心跳是否开启
                         if (isHeart) {
-                            try {
-                                calcLastSendTime(mThread, lastSendTime, heartInterval);
-                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-                            }
-                            if (data.size() != 0) {
-                                continue;
-                            }
-                            try {
-                                log.i(String.format("TCP正在发送心跳包，ip：%s，port：%d", ip, port), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                                output.write(heartData);
-                                output.flush();
-                                log.w(String.format("TCP发送心跳包成功，ip：%s，port：%d", ip, port), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                                tcpCallback.sendSuccess(TcpSocket.this, heartData);
-                                lastSendTime = new Date().getTime();
-                            } catch (Exception e) {
-//                                e.printStackTrace();
-                                log.e(String.format("TCP发送心跳包异常，ip：%s，port：%d，Exception：" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                            }
-                            try {
-                                mThread.sleep(heartInterval);
-                            } catch (InterruptedException e) {
-                                log.e(String.format("TCP发送心跳包等待时被唤醒，ip：%s，port：%d，Exception：" + e.toString(), ip, port), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                            }
+                            //发送心跳
+                            sendHeart();
                         } else {
+                            //没有待发数据，未开启心跳包，则关闭线程
                             SendThread.this.close();
                         }
                         continue;
-                    }
-                    List<byte[]> _data = new ArrayList<>();
-                    _data.addAll(data);
-                    for (int i = 0; i < _data.size() && (!isClosed()); i++) {
-                        try {
-                            calcLastSendTime(mThread, lastSendTime, interval);
-                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-                        }
-                        try {
-                            String d = "";
-                            for (byte b : _data.get(i)) {
-                                d += Common.byte2Int16(b).toUpperCase() + " ";
-                            }
-
-                            log.i(String.format("TCP正在发送数据，ip：%s，port：%d，数据长度：%d；数据：" + d, ip, port, _data.get(i).length), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                            output.write(_data.get(i));
-                            output.flush();
-                            data.remove(_data.get(i));
-                            log.w(String.format("TCP发送数据成功，ip：%s，port：%d，数据长度：%d；数据：" + d, ip, port, _data.get(i).length), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName(), "run");
-                            tcpCallback.sendSuccess(TcpSocket.this, _data.get(i));
-                            lastSendTime = new Date().getTime();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            i--;
-                            try {
-                                mThread.sleep(300l);
-                            } catch (InterruptedException e1) {
-                                e1.printStackTrace();
-                            }
-                        }
+                    } else {
+                        //将data数据转存到_data中
+                        _data.addAll(mDataBuffer);
+                        mDataBuffer.clear();
                     }
                 }
-                SendThread.this.close();
+
+                /** 将数据队列的数据进行发送 */
+                for (int i = 0; i < _data.size() && (!isClosed()); i++) {
+                    /** 保持数据发送间隔 */
+                    try {
+                        keepInterval(mLastSendTime, mInterval);
+                    } catch (InterruptedException e) {
+//                            e.printStackTrace();
+                    }
+
+                    if (isClosed()) {
+                        return;
+                    }
+
+                    /** 发送数据 */
+                    sendData(mHeartData);
+                }
+            }
+            SendThread.this.close();
+        }
+
+        /** 发送心跳 */
+        private void sendHeart() {
+            /* 保持发送间隔 */
+            try {
+                keepInterval(mLastSendTime, mHeartInterval);
+            } catch (InterruptedException e) {
+                // e.printStackTrace();
+            }
+
+            if (mDataBuffer.size() != 0 || isClosed()) {
+                return;
+            }
+
+            /* 数据发送 */
+            sendData(mHeartData);
+            /* 等待心跳包间隔 */
+            try {
+                wait(mHeartInterval);
+            } catch (InterruptedException e) {
+                log.ee(String.format("TCP发送心跳包等待时被唤醒，ip：%s，port：%d，Exception：" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+            }
+        }
+
+        /** 发送数据 */
+        private void sendData(byte[] data) {
+            String _log = "";
+            boolean _isHeart = data == mHeartData;
+            if (_isHeart) {
+                _log = "心跳包";
+            } else {
+                _log = Common.bytes2Int16(" ", data);
+            }
+
+            try {
+                //发送
+                log.d(String.format("TCP正在发送数据，ip：%s，port：%d，数据长度：%d；数据：%s", mIp, mPort, data.length, _log), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+                mOutput.write(mHeartData);
+                mOutput.flush();
+                log.d(String.format("TCP发送数据成功，ip：%s，port：%d，数据长度：%d；数据：%s", mIp, mPort, data.length, _log), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+                //回调
+                mTcpCallback.onSend(TcpSocket.this, data, true);
+                //记录
+                mLastSendTime = System.currentTimeMillis();
+            } catch (Exception e) {
+                //e.printStackTrace();
+                log.ee(String.format("TCP发送数据异常，ip：%s，port：%d，数据长度：%d；数据：%s；Exception：%s", mIp, mPort, data.length, _log, e.toString()), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+                mTcpCallback.onSend(TcpSocket.this, data, false);
+            }
+        }
+
+        /**
+         * 计算最后一次发送的时间,若间隔过小则睡眠相差的毫秒数
+         * 保持两次发送数据的间隔，如果太快则进行睡眠
+         *
+         * @throws InterruptedException 线程睡眠时被唤醒
+         */
+        private void keepInterval(long lastSendTime, long interval)
+                throws InterruptedException {
+            if (lastSendTime == 0L || interval == 0L) {
+                return;
+            }
+            Long _intervel = System.currentTimeMillis() - lastSendTime;
+            if (_intervel < interval) {
+                wait(interval - _intervel);
             }
         }
     }

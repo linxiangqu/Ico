@@ -179,15 +179,13 @@ public class IcoGallery extends Gallery {
         public void onItemScrollStateChanged(int state);
     }
 
-    /**
-     * 执行自动滚动使用的线程
-     */
-    protected class CycleThread extends IcoThread {
+    /** 执行自动滚动使用的线程 */
+    private class CycleThread extends IcoThread {
         @Override
         public void run() {
             while (!isClosed()) {
                 try {
-                    mThread.sleep(speed);
+                    sleep(speed);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

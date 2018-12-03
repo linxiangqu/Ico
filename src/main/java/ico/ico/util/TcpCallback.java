@@ -5,35 +5,31 @@ package ico.ico.util;
  */
 public interface TcpCallback {
     /**
-     * 当接收到数据时调用该回调函数
+     * 当接收到数据时触发
      *
-     * @param buffer
+     * @param buffer 接收到的数据
      */
-    void receive(byte[] buffer);
+    void onReceive(byte[] buffer);
 
     /**
      * 当TCP连接失败次数超过设置时触发
      */
-    void connectFail(TcpSocket tcpSocket);
+    void onConnectFail(TcpSocket tcpSocket);
 
     /**
      * 当TCP连接成功时触发
      */
-    void connectSuccess(TcpSocket tcpSocket);
-
+    void onConnectSuccess(TcpSocket tcpSocket);
 
     /**
      * 数据发送成功时触发
      *
-     * @param tcpSocket
-     * @param buffer
+     * @param buffer 发送成功的数据
      */
-    void sendSuccess(TcpSocket tcpSocket, byte[] buffer);
+    void onSend(TcpSocket tcpSocket, byte[] buffer,boolean success);
 
     /**
-     * 当Tcp连接因IO异常被断开时
-     *
-     * @param tcpSocket
+     * 当Tcp连接因IO异常被断开时触发
      */
     void connectDisconnect(TcpSocket tcpSocket);
 }
