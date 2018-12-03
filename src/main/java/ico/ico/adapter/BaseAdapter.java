@@ -32,7 +32,7 @@ import ico.ico.constant.ImageLoaderPrefixConstant;
 
 public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extends RecyclerView.Adapter<HOLDER> {
 
-    public final static DisplayImageOptions.Builder BUILD = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true);
+    public final static DisplayImageOptions.Builder IMAGE_BUILD = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true);
 
     protected int selectPosition = -1;
     protected HashSet<Integer> selectPositions = new HashSet<>();
@@ -253,7 +253,7 @@ public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extend
 
         /*设置本地图形控件*/
         public BaseViewHolder loadImage(int widgetId, int resorceId) {
-            ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + resorceId, ((ImageView) getView(widgetId)), build.build());
+            ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + resorceId, ((ImageView) getView(widgetId)), IMAGE_BUILD.build());
             return this;
         }
 
@@ -262,22 +262,22 @@ public class BaseAdapter<DATA, HOLDER extends BaseAdapter.BaseViewHolder> extend
             if (TextUtils.isEmpty(url)) {
                 throw new IllegalArgumentException("url不能为空");
             }
-            ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), build.build());
+            ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), IMAGE_BUILD.build());
             return this;
         }
 
         /*设置本地图形控件*/
         public BaseViewHolder loadImage(int widgetId, int resorceId, int holderResId, int errorResId) {
-            ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + resorceId, ((ImageView) getView(widgetId)), build.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
+            ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + resorceId, ((ImageView) getView(widgetId)), IMAGE_BUILD.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
             return this;
         }
 
         /*设置本地图形控件*/
         public BaseViewHolder loadImage(int widgetId, String url, int holderResId, int errorResId) {
             if (TextUtils.isEmpty(url)) {
-                ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + errorResId, ((ImageView) getView(widgetId)), build.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
+                ImageLoader.getInstance().displayImage(ImageLoaderPrefixConstant.DRAWABLE + errorResId, ((ImageView) getView(widgetId)), IMAGE_BUILD.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
             } else {
-                ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), build.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
+                ImageLoader.getInstance().displayImage(url, ((ImageView) getView(widgetId)), IMAGE_BUILD.showImageOnLoading(holderResId).showImageOnFail(errorResId).showImageForEmptyUri(errorResId).build());
             }
             return this;
         }
