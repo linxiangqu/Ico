@@ -169,7 +169,7 @@ public class WebViewHelper {
             _function = function;
         }
         //拼接入参的参数
-        if (params != null || params.length != 0) {
+        if (params != null && params.length != 0) {
             for (int i = 0; i < params.length; i++) {
                 //空指针判断
                 if (params[i] == null || TextUtils.isEmpty(params[i].toString())) {
