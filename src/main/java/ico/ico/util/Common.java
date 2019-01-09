@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -22,6 +21,7 @@ import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.location.Criteria;
@@ -42,11 +42,14 @@ import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,16 +58,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -376,25 +373,27 @@ public class Common {
     public static void getLocalMac(final Context context, final LocalMacCallback callback) {
         final WifiManager wm = (WifiManager) context.getSystemService(Service.WIFI_SERVICE);
 
-        // 尝试打开WIFI，并获取mac地址
+        //如果本来就是开着，则直接获取
         if (wm.isWifiEnabled()) {
             callback.onLocalMac(getLocalMac());
             return;
         }
-        wm.setWifiEnabled(true);
-
         IntentFilter intentFilter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         context.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                log.w("===onReceive");
                 if (wm.getWifiState() == WifiManager.WIFI_STATE_ENABLING || wm.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
-
                     callback.onLocalMac(getLocalMac());
                     context.unregisterReceiver(this);
                     wm.setWifiEnabled(false);
+                    log.w("===关wifi");
                 }
             }
         }, intentFilter);
+        // 尝试打开WIFI，并获取mac地址
+        wm.setWifiEnabled(true);
+        log.w("===开wifi");
     }
 
     private static String getLocalMac() {
@@ -449,56 +448,91 @@ public class Common {
 
     //region ************************************************************************************************屏幕
 
-    /**
-     * 获取当前屏幕的开关状态
-     *
-     * @param context
-     * @return
-     */
+    /** 获取当前屏幕的开关状态 */
     public static boolean isScreenOn(Context context) {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         return powerManager.isScreenOn();
     }
 
-    /**
-     * 获取当前手机屏幕的宽度，px值
-     *
-     * @param context
-     * @return int
-     */
+    /** 获取当前手机屏幕的宽度，px值 */
     public static int getScreenWidth(Context context) {
         return context.getResources().getDisplayMetrics().widthPixels;
     }
 
-    /**
-     * 获取当前手机屏幕的高度，px值
-     *
-     * @param context
-     * @return int
-     */
+    /** 获取当前手机屏幕的高度，px值,如果当前手机开启了 虚拟按键 功能，则获取的 屏幕高度 不包含 虚拟导航栏的高度，无论虚拟导航栏是隐藏还是显示 */
     public static int getScreenHeight(Context context) {
+        //1---
+//        DisplayMetrics metric = new DisplayMetrics();
+//        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(metric);
+//        return metric.heightPixels;
+        //2--
+//        return ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
+        //3--
         return context.getResources().getDisplayMetrics().heightPixels;
     }
+
+    /** 获取当前手机屏幕真实的宽度，px值,包含虚拟导航栏 */
+    public static int getScreenRealWidth(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        return Common.getScreenRealMetrics(display).widthPixels;
+    }
+
+    /** 获取当前手机屏幕真实的高度，px值,包含虚拟导航栏 */
+    public static int getScreenRealHeight(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        //1---
+//        return Common.getScreenRealSize(display).y;
+        //2---
+        return Common.getScreenRealMetrics(display).heightPixels;
+    }
+
+    /** 获取真实的屏幕Metrics */
+    private static DisplayMetrics getScreenRealMetrics(Display display) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        if (Build.VERSION.SDK_INT >= 17) {
+            display.getRealMetrics(displayMetrics);
+        } else {
+            try {
+                Class classDisplay = Class.forName("android.view.Display");
+                Method methodGetRealMetrics = classDisplay.getMethod("getRealMetrics", DisplayMetrics.class);
+                methodGetRealMetrics.setAccessible(true);
+                methodGetRealMetrics.invoke(display, displayMetrics);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return displayMetrics;
+    }
+
+    /** 获取真实的屏幕Size */
+    private static Point getScreenRealSize(Display display) {
+        Point point = new Point();
+        if (Build.VERSION.SDK_INT >= 17) {
+            display.getRealSize(point);
+        } else {
+            try {
+                Class classDisplay = Class.forName("android.view.Display");
+                Method methodGetRealSize = classDisplay.getMethod("getRealSize", Point.class);
+                methodGetRealSize.setAccessible(true);
+                methodGetRealSize.invoke(display, point);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return point;
+    }
+
+
     //endregion
 
     //region ************************************************************************************************版本
 
-    /**
-     * 获取当前app的版本名称
-     *
-     * @param context
-     * @return String
-     */
+    /** 获取当前app的版本名称 */
     public static String getVersionName(Context context) throws PackageManager.NameNotFoundException {
         return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
     }
 
-    /**
-     * 获取当前app的版本代号
-     *
-     * @param context
-     * @return int
-     */
+    /** 获取当前app的版本代号 */
     public static int getVersionCode(Context context) throws PackageManager.NameNotFoundException {
         return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
     }
@@ -506,12 +540,7 @@ public class Common {
 
     //region ************************************************************************************************状态栏
 
-    /**
-     * 获取当前手机顶部状态栏的高度
-     *
-     * @param activity
-     * @return int
-     */
+    /** 获取当前手机顶部状态栏的高度 */
     public static int getStatusHeight(Activity activity) {
         int statusHeight = 0;
         Rect localRect = new Rect();
@@ -543,12 +572,7 @@ public class Common {
         return statusHeight;
     }
 
-    /**
-     * 获取当前手机顶部状态栏的高度
-     *
-     * @param context
-     * @return
-     */
+    /** 获取当前手机顶部状态栏的高度 */
     public static int getStatusBarHeight(Context context) {
         Resources resources = context.getResources();
         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
@@ -558,44 +582,22 @@ public class Common {
 
     //region ************************************************************************************************虚拟按键
 
-    /**
-     * 获取当前手机底部导航栏的高度
-     *
-     * @param context
-     * @return
-     */
+    /** 获取当前手机底部导航栏的高度 */
     public static int getNavigationBarHeight(Context context) {
         Resources resources = context.getResources();
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         return resources.getDimensionPixelSize(resourceId);
     }
 
-    /**
-     * 判断当前手机是否存在底部导航栏
-     *
-     * @param context
-     * @return
-     */
-    public static boolean checkDeviceHasNavigationBar(Context context) {
-        boolean hasNavigationBar = false;
-        Resources rs = context.getResources();
-        int id = rs.getIdentifier("config_showNavigationBar", "bool", "android");
-        if (id > 0) {
-            hasNavigationBar = rs.getBoolean(id);
+    /** 判断当前手机是否开启了虚拟按键，但不表示 是否显示 虚拟导航 */
+    public static boolean isOpenNavigationBar(Activity activity) {
+        int height = Common.getScreenHeight(activity);
+        int realHeight = Common.getScreenRealHeight(activity);
+        if (realHeight > height) {
+            return true;
+        } else {
+            return false;
         }
-        try {
-            Class systemPropertiesClass = Class.forName("android.os.SystemProperties");
-            Method m = systemPropertiesClass.getMethod("get", String.class);
-            String navBarOverride = (String) m.invoke(systemPropertiesClass, "qemu.hw.mainkeys");
-            if ("1".equals(navBarOverride)) {
-                hasNavigationBar = false;
-            } else if ("0".equals(navBarOverride)) {
-                hasNavigationBar = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return hasNavigationBar;
     }
     //endregion
 
@@ -795,6 +797,15 @@ public class Common {
             return false;
         }
     }
+
+
+    /** 获取文字在文本框中所需要的宽度 */
+    public static float getSpaceNeeded(TextView text, String newText) {
+        text.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        float textWidth = text.getPaint().measureText(newText);
+        return textWidth;
+    }
     //endregion
 
     //region ************************************************************************************************security
@@ -888,472 +899,6 @@ public class Common {
     public static String decodeBase64(String src) {
         byte[] decodeBytes = Base64.decode(src, Base64.DEFAULT);
         return new String(decodeBytes);
-    }
-
-    //endregion
-
-    //region ************************************************************************************************IO
-
-    /**
-     * 获取指定目录下的所有子目录
-     *
-     * @param dir
-     * @return
-     */
-    public static List<File> getSubdir(File dir) {
-        FileFilter ff = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory();
-            }
-        };
-        return Arrays.asList(dir.listFiles(ff));
-    }
-
-    /**
-     * 根据正则表达式获取符合条件的文件
-     *
-     * @param dir   要查找的目录
-     * @param regex 要匹配的正则表达式
-     * @param flag  是否匹配子目录下的文件
-     * @return List<File>
-     */
-    public static List<String> getFiles(File dir, String regex, boolean flag) {
-        List<String> files = new ArrayList<String>();
-        File[] subFiles = dir.listFiles();
-        for (File file : subFiles) {
-            if (file.isFile() && getSuffix(file).toLowerCase().matches(regex)) {//文件
-                files.add(file.getAbsolutePath());
-            } else if (file.isDirectory() && flag) {//目录
-                List<String> _files = Common.getFiles(file, regex, flag);
-                files.addAll(_files);
-            }
-        }
-        return files;
-    }
-
-    /**
-     * 根据正则表达式获取符合条件的文件
-     *
-     * @param dirs  要查找的目录
-     * @param regex 要匹配的正则表达式
-     * @param flag  是否匹配子目录下的文件
-     * @return List<File>
-     */
-    public static List<String> getFiles(List<File> dirs, String regex, boolean flag) {
-        List<String> files = new ArrayList<String>();
-        for (File dir : dirs) {
-            files.addAll(Common.getFiles(dir, regex, flag));
-        }
-        return files;
-    }
-
-    /**
-     * 获取文件的后缀名,不包含点
-     *
-     * @param file 要获取后缀名的文件对象
-     * @return
-     */
-    public static String getSuffix(File file) {
-        String suffix = "";
-        if (file.getName().lastIndexOf(".") == -1) {
-            return suffix;
-        }
-        suffix = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-        return suffix;
-    }
-
-    /**
-     * 获取文件后缀
-     *
-     * @param filePath 文件的绝对路径
-     * @return
-     */
-    public static String getSuffix(String filePath) {
-        File file = new File(filePath);
-        return getSuffix(file);
-    }
-
-    /**
-     * 获取文件的文件名,不包含点和后缀
-     *
-     * @param file 要获取的文件对象
-     * @return
-     */
-    public static String getFilename(File file) {
-        String filename = "";
-        if (file.getName().lastIndexOf(".") == -1) {
-            return filename;
-        }
-        filename = file.getName().substring(0, file.getName().lastIndexOf("."));
-        return filename;
-    }
-
-    /**
-     * 重命名文件名称
-     *
-     * @param file
-     * @param newName
-     * @return
-     * @throws IOException
-     */
-    public static File renameFile(File file, String newName) throws IOException {
-        if (!file.isFile()) {
-            throw new IOException("file参数所表示的不是一个文件");
-        }
-        if (!file.exists()) {
-            throw new IOException("file参数所表示的文件不存在");
-        }
-        newName = newName + Common.getSuffix(file);
-        File newFile = new File(file.getParentFile(), newName);
-        if (file.renameTo(newFile)) {
-            return newFile;
-        }
-        return null;
-    }
-
-    /**
-     * 拷贝文件
-     *
-     * @param file
-     * @param newFile
-     * @return
-     */
-    public static File copyFile(File file, File newFile) throws IOException {
-        if (!file.isFile()) {
-            throw new IOException("file参数所表示的不是一个文件");
-        }
-        if (!file.exists()) {
-            throw new IOException("file参数所表示的文件不存在");
-        }
-        //确认新目录是否存在并且可用
-        if ((!newFile.mkdirs())) {
-            throw new IOException("新目录无法创建");
-        }
-        if (!newFile.getParentFile().canWrite()) {
-            throw new IOException("新目录无法执行写入操作");
-        }
-        //创建新的文件
-        newFile.delete();
-        newFile.createNewFile();
-        //创建输入输出流
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try {
-            fis = new FileInputStream(file);
-            fos = new FileOutputStream(newFile);
-            while (true) {
-                byte[] buffer = new byte[1024 * 1024 * 4];
-                int len = fis.read(buffer);
-                if (len == -1) {
-                    break;
-                }
-                fos.write(buffer, 0, len);
-            }
-            fos.flush();
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return newFile;
-    }
-
-    /**
-     * 移动文件
-     *
-     * @param file
-     * @param _newFile
-     * @return
-     */
-    public static File moveFile(File file, File _newFile) throws IOException {
-        File newFile = copyFile(file, _newFile);
-        if (newFile != null) {
-            file.delete();
-        }
-        return newFile;
-    }
-
-    /**
-     * 向指定文件中写入字符串
-     *
-     * @param file
-     * @param text
-     * @param isAppend
-     */
-    public static void writeFile(File file, String text, boolean isAppend) throws IOException {
-        ensureFile(file);
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(file, isAppend);
-            if (isAppend) {
-                fw.write(text);
-            } else {
-                fw.write(text);
-            }
-            fw.flush();
-        } catch (FileNotFoundException e) {
-            throw e;
-        } finally {
-            if (fw != null) {
-                fw.close();
-            }
-        }
-    }
-
-    /**
-     * 向指定文件中写入字节数组
-     *
-     * @param file
-     * @param buffer
-     */
-    public static void writeFile(File file, byte... buffer) throws IOException {
-        ensureFile(file);
-        BufferedOutputStream out = null;
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(buffer);
-            out.flush();
-        } catch (FileNotFoundException e) {
-            throw e;
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
-    /**
-     * 向指定文件中写入字节数组,这是一个图片文件
-     *
-     * @param file
-     * @param buffer
-     */
-    public static File writeFileAImage(File file, byte... buffer) throws IOException {
-        File _file = ensureFileACreate(file);
-        BufferedOutputStream out = null;
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(_file));
-            out.write(buffer);
-            out.flush();
-            return _file;
-        } catch (FileNotFoundException e) {
-            throw e;
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
-    /**
-     * 确保文件存在,如果文件不存在则创建
-     *
-     * @param file
-     * @throws IOException
-     */
-    public static void ensureFile(File file) throws IOException {
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (file.exists()) {
-            file.createNewFile();
-        }
-    }
-
-    /**
-     * 确保文件存在,如果文件存在则删除重新创建
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    public static void ensureFileADelete(File file) throws IOException {
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (!file.exists()) {
-            file.createNewFile();
-        } else {
-            //如果已存在，则删除，并重新创建
-            file.delete();
-            file.createNewFile();
-        }
-    }
-
-    /**
-     * 确保文件存在,如果文件存在则修改文件名称重新创建
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    public static File ensureFileACreate(File file) throws IOException {
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (!file.exists()) {
-            file.createNewFile();
-            return file;
-        }
-        //如果已存在，则filename(n).suffix
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
-            //获取名称
-            String filename = getFilename(file);
-            String suffix = getSuffix(file);
-            File tmp = new File(file.getParent(), filename + "(" + i + ")." + suffix);
-            if (!tmp.exists()) {
-                tmp.createNewFile();
-                return tmp;
-            }
-        }
-        throw new IOException("无法创建文件" + file.getAbsolutePath());
-    }
-
-    /**
-     * 读取文件
-     *
-     * @param file
-     */
-    public static List<Byte> readFile(File file) throws IOException {
-        List<Byte> list = new ArrayList<Byte>();
-        FileInputStream fileInputStream = new FileInputStream(file);
-        while (true) {
-            byte[] buffer = new byte[1024 * 4 * 4];
-            int len = fileInputStream.read(buffer);
-            if (len == -1) {
-                break;
-            }
-            for (int i = 0; i < len; i++) {
-                List<Byte> _list = Arrays.asList(buffer[i]);
-                list.add(_list.get(0));
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 读取文件
-     *
-     * @param file
-     */
-    public static byte[] readFiles(File file) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        FileInputStream fileInputStream = new FileInputStream(file);
-        while (true) {
-            byte[] buffer = new byte[1024 * 4 * 4];
-            int len = fileInputStream.read(buffer);
-            if (len == -1) {
-                break;
-            }
-            byteArrayOutputStream.write(buffer, 0, len);
-        }
-        byteArrayOutputStream.close();
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    /**
-     * 读取流
-     *
-     * @param inputStream
-     */
-    public static byte[] readInputStream(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        while (true) {
-            byte[] buffer = new byte[1024 * 4 * 4];
-            int len = inputStream.read(buffer);
-            if (len == -1) {
-                break;
-            }
-            byteArrayOutputStream.write(buffer, 0, len);
-        }
-        byteArrayOutputStream.close();
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    /**
-     * 读取assets中的文件文件,返回字节集合
-     *
-     * @param assetManager asset管理器
-     * @param filename     文件名称
-     * @return
-     * @throws IOException
-     */
-    public static List<Byte> readFile(AssetManager assetManager, String filename) throws IOException {
-        BufferedInputStream input = new BufferedInputStream(assetManager.open(filename));
-        List<Byte> list = new ArrayList<>();
-        while (true) {
-            byte[] buffer = new byte[1024 * 4 * 4];
-            int len = input.read(buffer);
-            if (len == -1) {
-                break;
-            }
-            for (int i = 0; i < len; i++) {
-                List<Byte> _list = Arrays.asList(buffer[i]);
-                list.add(_list.get(0));
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 读取assets中的文件文件，根据encoding转化为字符，最后拼接返回
-     *
-     * @param assetManager asset管理器
-     * @param filename     文件名称
-     * @param encoding     编码方式
-     * @return
-     * @throws IOException
-     */
-    public static String readFile(AssetManager assetManager, String filename, String encoding) throws IOException {
-        BufferedInputStream input = new BufferedInputStream(assetManager.open(filename));
-        StringBuilder sb = new StringBuilder();
-        while (true) {
-            byte[] buffer = new byte[1024 * 4 * 4];
-            int len = input.read(buffer);
-            if (len == -1) {
-                break;
-            }
-            sb.append(new String(buffer, 0, len, encoding));
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 递归删除 文件/文件夹
-     *
-     * @param file
-     */
-    public static void deleteFile(File file) {
-
-        log.w("delete file path=" + file.getAbsolutePath());
-
-        if (file.exists()) {
-            if (file.isFile()) {
-                file.delete();
-            } else if (file.isDirectory()) {
-                File files[] = file.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    deleteFile(files[i]);
-                }
-            }
-            file.delete();
-        } else {
-            log.e("delete file no exists " + file.getAbsolutePath());
-        }
     }
 
     //endregion
@@ -1568,56 +1113,92 @@ public class Common {
     }
 
     /**
-     * 将16进制字符串转换为byte
+     * 将16进制字符串转换为byte,如果字符串长度大于2，则只获取前两个字节进行转化
      *
-     * @param hexStr
-     * @return
+     * @param hexStr 要转化的字符串
+     * @return byte 转化后的字节
      */
-    public static byte hexstr2Byte(String hexStr) {
-        char[] chars = hexStr.toUpperCase().toCharArray();
-        byte[] bytes = new byte[chars.length];
-        for (int i = 0; i < chars.length; i++) {
-            bytes[i] = (byte) "0123456789ABCDEF".indexOf(chars[i]);
+    public static byte int162Byte(String hexStr) {
+        //取出字符串中的16进制字符串
+        String hexStri = Common.extractInt16(hexStr);
+        if (hexStri.length() > 2) {
+            hexStri = hexStri.substring(0, 2);
         }
-        byte buffer = 0;
-        if (bytes.length == 2) {
-            buffer = (byte) (((bytes[0] << 4) & 0xf0) | (bytes[1]));
-        } else {
-            buffer = bytes[0];
+        return (byte) Integer.parseInt(hexStri, 16);
+//        char[] chars = hexStr.toUpperCase().toCharArray();
+//        byte[] bytes = new byte[chars.length];
+//        for (int i = 0; i < chars.length; i++) {
+//            bytes[i] = (byte) "0123456789ABCDEF".indexOf(chars[i]);
+//        }
+//        byte buffer = 0;
+//        if (bytes.length == 2) {
+//            buffer = (byte) (((bytes[0] << 4) & 0xf0) | (bytes[1]));
+//        } else {
+//            buffer = bytes[0];
+//        }
+//        return buffer;
+    }
+
+    /**
+     * 函数不对字符串进行校验，直接提取字符串中的16进制字符组合后再转化
+     * <p>
+     * 可以使用{@link Common#isInt16(String)} 判断
+     *
+     * @param hexStr 要转化的字符串，函数直接对入参的字符串通过{@link Common#extractInt16(String)}提取其中所有16进制的字符然后再做转化
+     *               所以如果要判断字符串是否符合格式请自行判断
+     * @return byte类型数组
+     */
+    public static byte[] int162Bytes(String hexStr) {
+        if (TextUtils.isEmpty(hexStr.trim())) {
+            return null;
+        }
+
+        //取出字符串中的16进制字符串
+        String hexStri = Common.extractInt16(hexStr);
+
+        //如果小于等于2位长度，直接通过int162Byte进行解析
+        if (hexStri.length() <= 2) {
+            return new byte[]{Common.int162Byte(hexStri)};
+        }
+        //对提取后的16进制字符串进行转化
+        int len = hexStri.length() % 2 == 0 ? hexStri.length() / 2 : hexStri.length() / 2 + 1;
+        byte[] buffer = new byte[len];
+        for (int i = 0; i < len; i++) {
+            int start = i * 2;
+            int end = start + 2;
+            if (end > hexStri.length()) {
+                end = hexStri.length();
+            }
+            buffer[i] = Common.int162Byte(hexStri.substring(start, end));
         }
         return buffer;
     }
 
+
     /**
-     * 将一个16进制的字符串转化成一个字节数组
-     * 字符串以16进制字节为一个单位以冒号分隔
-     * 如 AA:BB:CC:DD...
-     * 分隔符可以通过{@link Common#insert(String, String, int)}进行插入
+     * 将字符串中的16进制字符取出并返回
      *
-     * @param mac 会对格式进行检查
-     *            如果只有一位,左边加0,变两位,如 A->0A
+     * @param hexStr 字符串
+     * @return String 提取出的16进制字符串
+     */
+    private static String extractInt16(String hexStr) {
+        StringBuffer reStr = new StringBuffer();
+
+        Matcher m = Pattern.compile(RegularConstant.BINARY_16).matcher(hexStr);
+        while (m.find()) {
+            reStr.append(m.group());
+        }
+        return reStr.toString();
+    }
+
+    /**
+     * 判断字符串是否为正确的16进制,只判断字符串中是否存在g-z的字符，如果有符号则忽略
+     *
      * @return
      */
-    public static byte[] hexstr2Bytes(String joinStr, String mac) throws IllegalArgumentException {
-        if (TextUtils.isEmpty(mac)) {
-            return null;
-        }
-        mac = mac.toUpperCase();
-        //检查数据中是否符合16进制格式
-        if (!mac.matches(RegularConstant.BINARY_16)) {
-            throw new IllegalArgumentException("mac中存在16进制以外的英文,mac=" + mac);
-        }
-        if (mac.length() != 2) {
-            if (!mac.matches("([0123456789ABCDEF]{2}[:]{1})+[0123456789ABCDEF]{2}")) {
-                throw new IllegalArgumentException("输入参数mac格式为AA:BB:CC...,如果是一个字节的16进制字符串,请使用hexstr2Byte,mac=" + mac);
-            }
-        }
-        String[] _mac = mac.split(joinStr);
-        byte[] buffer = new byte[_mac.length];
-        for (int i = 0; i < _mac.length; i++) {
-            buffer[i] = Common.hexstr2Byte(_mac[i]);
-        }
-        return buffer;
+    public static boolean isInt16(String hexStr) {
+        Matcher m = Pattern.compile(RegularConstant.BINARY_16_REVERSE).matcher(hexStr);
+        return !m.find();
     }
 
     /**
@@ -1973,7 +1554,7 @@ public class Common {
                 Common.saveBitmap(bitmap, photo);
             } catch (Exception e) {
                 //                    e.printStackTrace();
-                log.ee("裁剪图片后保存图片异常，Exception：" + e.toString(), activity.getClass().getSimpleName(), "onActivityResult");
+                log.ew("裁剪图片后保存图片异常，Exception：" + e.toString(), activity.getClass().getSimpleName(), "onActivityResult");
                 Toast.makeText(activity, "无法保存图片，请检查SD卡!", Toast.LENGTH_LONG).show();
                 return true;
             }
@@ -2020,7 +1601,7 @@ public class Common {
             }
         } catch (Exception e) {
 //            e.printStackTrace();
-            log.ee("获取用户选择的联系人号码时异常，Excepiton：" + e.toString(), activity.getClass().getSimpleName(), "handleResultForContact");
+            log.ew("获取用户选择的联系人号码时异常，Excepiton：" + e.toString(), activity.getClass().getSimpleName(), "handleResultForContact");
         } finally {
             //SDK大于14，cursor会自动关闭
 //            if (mApp.versionCode < 14) {
@@ -2429,12 +2010,18 @@ public class Common {
 
     /**
      * 将一个字符串数组根据某个字符串连接
+     * <p>
+     * 为了解耦合，这个函数有其他分支，以下列出分支
+     * <p>
+     * {@link log#concat(String, String...)}
      *
      * @param str   要插入的字符串
-     * @param texts 要被拼接的字符串数组
+     * @param texts 要被拼接的字符串数组,如果传入null或者空数组，则将返回空字符串
      * @return
      */
     public static String concat(String str, String... texts) {
+        if (texts == null || texts.length == 0) return "";
+        if (texts.length == 1) return texts[0];
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < texts.length; i++) {
             String tmp = texts[i];
@@ -2488,26 +2075,32 @@ public class Common {
 
     /**
      * 将一个字符串根据指定长度进行分割
+     * <p>
+     * 为了解耦合，这个函数有其他分支，以下列出分支
+     * <p>
+     * {@link log#split(String, int)}
      *
-     * @return
+     * @param str  要分割的字符串，如果传入的是个null值，则将拼接 空字符串 添加到集合中进行返回
+     * @param size 指定的长度，分割的每个部分保证不大于这个长度
+     * @return List(String) 返回一个集合，集合必定不为空并且至少有一个数据
      */
+    @NonNull
     public static List<String> split(String str, int size) {
         List<String> data = new ArrayList<>();
-        if (str.length() <= size) {
-            data.add(str);
-            return data;
-        } else {
-            while (true) {
-                if (str.length() > size) {
-                    data.add(str.substring(0, size));
-                } else {
-                    data.add(str.substring(0));
-                    break;
-                }
-                str = str.substring(size);
-            }
+        if (TextUtils.isEmpty(str) || str.length() <= size) {
+            data.add(str + "");
             return data;
         }
+        while (true) {
+            if (str.length() > size) {
+                data.add(str.substring(0, size));
+            } else {
+                data.add(str);
+                break;
+            }
+            str = str.substring(size);
+        }
+        return data;
     }
 
     /**
@@ -2515,7 +2108,7 @@ public class Common {
      *
      * @param s        原字符串
      * @param iStr     要插入的字符串
-     * @param interval 间隔时间
+     * @param interval 间隔字符数量
      * @return
      */
     public static String insert(String s, String iStr, int interval) {

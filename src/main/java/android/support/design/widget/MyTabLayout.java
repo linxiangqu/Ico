@@ -24,7 +24,7 @@ import android.util.AttributeSet;
  * 项目需求,下划线宽度比文字宽度小,设置的地方是私有的,所以对TabLayout源码进行了导出并且重命名为BaseLayout,然后使用MyTabLayout进行了继承
  */
 @ViewPager.DecorView
-public class MyTabLayout extends BaseTabLayout {
+public class MyTabLayout extends BaseTabLayouts {
     public MyTabLayout(Context context) {
         super(context);
     }

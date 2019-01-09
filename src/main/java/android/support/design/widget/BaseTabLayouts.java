@@ -36,6 +36,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.StringRes;
+import android.support.design.animation.AnimationUtils;
 import android.support.v4.util.Pools;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
@@ -149,7 +150,7 @@ import static android.support.v4.view.ViewPager.SCROLL_STATE_SETTLING;
  * @see <a href="http://www.google.com/design/spec/components/tabs.html">Tabs</a>
  */
 @DecorView
-public class BaseTabLayout extends HorizontalScrollView {
+public class BaseTabLayouts extends HorizontalScrollView {
     /**
      * Scrollable tabs display a subset of tabs at any given moment, and can contain longer tab
      * labels and a larger number of tabs. They are best used for browsing contexts in touch
@@ -169,7 +170,7 @@ public class BaseTabLayout extends HorizontalScrollView {
      */
     public static final int MODE_FIXED = 1;
     /**
-     * Gravity used to fill the {@link BaseTabLayout} as much as possible. This option only takes effect
+     * Gravity used to fill the {@link BaseTabLayouts} as much as possible. This option only takes effect
      * when used with {@link #MODE_FIXED}.
      *
      * @see #setTabGravity(int)
@@ -177,7 +178,7 @@ public class BaseTabLayout extends HorizontalScrollView {
      */
     public static final int GRAVITY_FILL = 0;
     /**
-     * Gravity used to lay out the tabs in the center of the {@link BaseTabLayout}.
+     * Gravity used to lay out the tabs in the center of the {@link BaseTabLayouts}.
      *
      * @see #setTabGravity(int)
      * @see #getTabGravity()
@@ -226,18 +227,18 @@ public class BaseTabLayout extends HorizontalScrollView {
     private AdapterChangeListener mAdapterChangeListener;
     private boolean mSetupViewPagerImplicitly;
 
-    public BaseTabLayout(Context context) {
+    public BaseTabLayouts(Context context) {
         this(context, null);
     }
 
-    public BaseTabLayout(Context context, AttributeSet attrs) {
+    public BaseTabLayouts(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public BaseTabLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BaseTabLayouts(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        ThemeUtils.checkAppCompatTheme(context);
+//        ThemeUtils.checkAppCompatTheme(context);
 
         // Disable the Scroll Bar
         setHorizontalScrollBarEnabled(false);
@@ -248,31 +249,31 @@ public class BaseTabLayout extends HorizontalScrollView {
         super.addView(mTabStrip, 0, new LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.BaseTabLayout,
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.BaseTabLayouts,
                 defStyleAttr, R.style.Widget_Design_TabLayout);
 
         mTabStrip.setSelectedIndicatorHeight(
-                a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabIndicatorHeight, 0));
-        mTabStrip.setSelectedIndicatorColor(a.getColor(R.styleable.BaseTabLayout_tabIndicatorColor, 0));
+                a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabIndicatorHeight, 0));
+        mTabStrip.setSelectedIndicatorColor(a.getColor(R.styleable.BaseTabLayouts_tabIndicatorColor, 0));
 
         mTabPaddingStart = mTabPaddingTop = mTabPaddingEnd = mTabPaddingBottom = a
-                .getDimensionPixelSize(R.styleable.BaseTabLayout_tabPadding, 0);
-        mTabPaddingStart = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabPaddingStart,
+                .getDimensionPixelSize(R.styleable.BaseTabLayouts_tabPadding, 0);
+        mTabPaddingStart = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabPaddingStart,
                 mTabPaddingStart);
-        mTabPaddingTop = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabPaddingTop,
+        mTabPaddingTop = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabPaddingTop,
                 mTabPaddingTop);
-        mTabPaddingEnd = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabPaddingEnd,
+        mTabPaddingEnd = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabPaddingEnd,
                 mTabPaddingEnd);
-        mTabPaddingBottom = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabPaddingBottom,
+        mTabPaddingBottom = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabPaddingBottom,
                 mTabPaddingBottom);
 
-        mTabTextAppearance = a.getResourceId(R.styleable.BaseTabLayout_tabTextAppearance,
+        mTabTextAppearance = a.getResourceId(R.styleable.BaseTabLayouts_tabTextAppearance,
                 R.style.TextAppearance_Design_Tab);
 
         //TODO 获取下划线的左右内边距
-        tabIndicatorOffsetLeft = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabIndicatorOffsetLeft,
+        tabIndicatorOffsetLeft = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabIndicatorOffsetLeft,
                 tabIndicatorOffsetLeft);
-        tabIndicatorOffsetRight = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabIndicatorOffsetRight,
+        tabIndicatorOffsetRight = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabIndicatorOffsetRight,
                 tabIndicatorOffsetRight);
 
         // Text colors/sizes come from the text appearance first
@@ -287,27 +288,27 @@ public class BaseTabLayout extends HorizontalScrollView {
             ta.recycle();
         }
 
-        if (a.hasValue(R.styleable.BaseTabLayout_tabTextColor)) {
+        if (a.hasValue(R.styleable.BaseTabLayouts_tabTextColor)) {
             // If we have an explicit text color set, use it instead
-            mTabTextColors = a.getColorStateList(R.styleable.BaseTabLayout_tabTextColor);
+            mTabTextColors = a.getColorStateList(R.styleable.BaseTabLayouts_tabTextColor);
         }
 
-        if (a.hasValue(R.styleable.BaseTabLayout_tabSelectedTextColor)) {
+        if (a.hasValue(R.styleable.BaseTabLayouts_tabSelectedTextColor)) {
             // We have an explicit selected text color set, so we need to make merge it with the
             // current colors. This is exposed so that developers can use theme attributes to set
             // this (theme attrs in ColorStateLists are Lollipop+)
-            final int selected = a.getColor(R.styleable.BaseTabLayout_tabSelectedTextColor, 0);
+            final int selected = a.getColor(R.styleable.BaseTabLayouts_tabSelectedTextColor, 0);
             mTabTextColors = createColorStateList(mTabTextColors.getDefaultColor(), selected);
         }
 
-        mRequestedTabMinWidth = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabMinWidth,
+        mRequestedTabMinWidth = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabMinWidth,
                 INVALID_WIDTH);
-        mRequestedTabMaxWidth = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabMaxWidth,
+        mRequestedTabMaxWidth = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabMaxWidth,
                 INVALID_WIDTH);
-        mTabBackgroundResId = a.getResourceId(R.styleable.BaseTabLayout_tabBackground, 0);
-        mContentInsetStart = a.getDimensionPixelSize(R.styleable.BaseTabLayout_tabContentStart, 0);
-        mMode = a.getInt(R.styleable.BaseTabLayout_tabMode, MODE_FIXED);
-        mTabGravity = a.getInt(R.styleable.BaseTabLayout_tabGravity, GRAVITY_FILL);
+        mTabBackgroundResId = a.getResourceId(R.styleable.BaseTabLayouts_tabBackground, 0);
+        mContentInsetStart = a.getDimensionPixelSize(R.styleable.BaseTabLayouts_tabContentStart, 0);
+        mMode = a.getInt(R.styleable.BaseTabLayouts_tabMode, MODE_FIXED);
+        mTabGravity = a.getInt(R.styleable.BaseTabLayouts_tabGravity, GRAVITY_FILL);
         a.recycle();
 
         // TODO add attr for these
@@ -450,14 +451,14 @@ public class BaseTabLayout extends HorizontalScrollView {
 
     private void addTabFromItemView(@NonNull TabItem item) {
         final Tab tab = newTabs();
-        if (item.mText != null) {
-            tab.setText(item.mText);
+        if (item.text != null) {
+            tab.setText(item.text);
         }
-        if (item.mIcon != null) {
-            tab.setIcon(item.mIcon);
+        if (item.icon != null) {
+            tab.setIcon(item.icon);
         }
-        if (item.mCustomLayout != 0) {
-            tab.setCustomView(item.mCustomLayout);
+        if (item.customLayout != 0) {
+            tab.setCustomView(item.customLayout);
         }
         if (!TextUtils.isEmpty(item.getContentDescription())) {
             tab.setContentDescription(item.getContentDescription());
@@ -485,7 +486,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Add a {@link BaseTabLayout.OnTabSelectedListener} that will be invoked when tab selection
+     * Add a {@link BaseTabLayouts.OnTabSelectedListener} that will be invoked when tab selection
      * changes.
      * <p>
      * <p>Components that add a listener should take care to remove it when finished via
@@ -500,7 +501,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Remove the given {@link BaseTabLayout.OnTabSelectedListener} that was previously added via
+     * Remove the given {@link BaseTabLayouts.OnTabSelectedListener} that was previously added via
      * {@link #addOnTabSelectedListener(OnTabSelectedListener)}.
      *
      * @param listener listener to remove
@@ -510,7 +511,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Remove all previously added {@link BaseTabLayout.OnTabSelectedListener}s.
+     * Remove all previously added {@link BaseTabLayouts.OnTabSelectedListener}s.
      */
     public void clearOnTabSelectedListeners() {
         mSelectedListeners.clear();
@@ -621,7 +622,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Returns the current mode used by this {@link BaseTabLayout}.
+     * Returns the current mode used by this {@link BaseTabLayouts}.
      *
      * @see #setTabMode(int)
      */
@@ -706,7 +707,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * The one-stop shop for setting up this {@link BaseTabLayout} with a {@link ViewPager}.
+     * The one-stop shop for setting up this {@link BaseTabLayouts} with a {@link ViewPager}.
      * <p>
      * <p>This is the same as calling {@link #setupWithViewPager(ViewPager, boolean)} with
      * auto-refresh enabled.</p>
@@ -718,7 +719,7 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * The one-stop shop for setting up this {@link BaseTabLayout} with a {@link ViewPager}.
+     * The one-stop shop for setting up this {@link BaseTabLayouts} with a {@link ViewPager}.
      * <p>
      * <p>This method will link the given ViewPager and this TabLayout together so that
      * changes in one are automatically reflected in the other. This includes scroll state changes
@@ -1285,7 +1286,7 @@ public class BaseTabLayout extends HorizontalScrollView {
          * @see #getPosition()
          */
         public static final int INVALID_POSITION = -1;
-        BaseTabLayout mParent;
+        BaseTabLayouts mParent;
         TabView mView;
         private Object mTag;
         private Drawable mIcon;
@@ -1544,7 +1545,7 @@ public class BaseTabLayout extends HorizontalScrollView {
 
     /**
      * A {@link OnPageChangeListener} class which contains the
-     * necessary calls back to the provided {@link BaseTabLayout} so that the tab position is
+     * necessary calls back to the provided {@link BaseTabLayouts} so that the tab position is
      * kept in sync.
      * <p>
      * <p>This class stores the provided TabLayout weakly, meaning that you can use
@@ -1553,11 +1554,11 @@ public class BaseTabLayout extends HorizontalScrollView {
      * not cause a leak.
      */
     public static class TabLayoutOnPageChangeListener implements OnPageChangeListener {
-        private final WeakReference<BaseTabLayout> mTabLayoutRef;
+        private final WeakReference<BaseTabLayouts> mTabLayoutRef;
         private int mPreviousScrollState;
         private int mScrollState;
 
-        public TabLayoutOnPageChangeListener(BaseTabLayout myTabLayout) {
+        public TabLayoutOnPageChangeListener(BaseTabLayouts myTabLayout) {
             mTabLayoutRef = new WeakReference<>(myTabLayout);
         }
 
@@ -1570,7 +1571,7 @@ public class BaseTabLayout extends HorizontalScrollView {
         @Override
         public void onPageScrolled(final int position, final float positionOffset,
                                    final int positionOffsetPixels) {
-            final BaseTabLayout myTabLayout = mTabLayoutRef.get();
+            final BaseTabLayouts myTabLayout = mTabLayoutRef.get();
             if (myTabLayout != null) {
                 // Only update the text selection if we're not settling, or we are settling after
                 // being dragged
@@ -1587,7 +1588,7 @@ public class BaseTabLayout extends HorizontalScrollView {
 
         @Override
         public void onPageSelected(final int position) {
-            final BaseTabLayout myTabLayout = mTabLayoutRef.get();
+            final BaseTabLayouts myTabLayout = mTabLayoutRef.get();
             if (myTabLayout != null && myTabLayout.getSelectedTabPosition() != position
                     && position < myTabLayout.getTabCount()) {
                 // Select the tab, only updating the indicator if we're not being dragged/settled
@@ -1605,10 +1606,10 @@ public class BaseTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * A {@link BaseTabLayout.OnTabSelectedListener} class which contains the necessary calls back
+     * A {@link BaseTabLayouts.OnTabSelectedListener} class which contains the necessary calls back
      * to the provided {@link ViewPager} so that the tab position is kept in sync.
      */
-    public static class ViewPagerOnTabSelectedListener implements BaseTabLayout.OnTabSelectedListener {
+    public static class ViewPagerOnTabSelectedListener implements BaseTabLayouts.OnTabSelectedListener {
         private final ViewPager mViewPager;
 
         public ViewPagerOnTabSelectedListener(ViewPager viewPager) {
@@ -1616,17 +1617,17 @@ public class BaseTabLayout extends HorizontalScrollView {
         }
 
         @Override
-        public void onTabSelected(BaseTabLayout.Tab tab) {
+        public void onTabSelected(BaseTabLayouts.Tab tab) {
             mViewPager.setCurrentItem(tab.getPosition());
         }
 
         @Override
-        public void onTabUnselected(BaseTabLayout.Tab tab) {
+        public void onTabUnselected(BaseTabLayouts.Tab tab) {
             // No-op
         }
 
         @Override
-        public void onTabReselected(BaseTabLayout.Tab tab) {
+        public void onTabReselected(BaseTabLayouts.Tab tab) {
             // No-op
         }
     }

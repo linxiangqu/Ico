@@ -131,7 +131,7 @@ public class TcpSocket extends IcoThread {
                 setConnected(true);
                 break;
             } catch (Exception e) {
-                log.ee(String.format("TCP建立连接失败%d,ip:%s,port:%d,Exception:" + e.toString(), i, mIp, mPort) + i, TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP建立连接失败%d,ip:%s,port:%d,Exception:" + e.toString(), i, mIp, mPort) + i, TcpSocket.class.getSimpleName());
                 if (i == mMaxConnectTimes - 1) {
                     mTcpCallback.onConnectFail(this);
                     close();
@@ -160,12 +160,12 @@ public class TcpSocket extends IcoThread {
                 log.d(String.format("TCP接收数据成功，ip：%s，port：%d，数据长度：%d；数据：%s", mIp, mPort, len, Common.bytes2Int16(" ", buffer)), TcpSocket.class.getSimpleName());
             } catch (IOException e) {
 //                e.printStackTrace();
-                log.ee(String.format("TCP连接IO流异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP连接IO流异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
                 close();
                 mTcpCallback.connectDisconnect(this);
             } catch (Exception e) {
 //                e.printStackTrace();
-                log.ee(String.format("TCP数据接收异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP数据接收异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
     }
@@ -185,7 +185,7 @@ public class TcpSocket extends IcoThread {
                 mInput.close();
                 mInput = null;
             } catch (Exception e) {
-                log.ee(String.format("TCP输入流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP输入流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
         if (mOutput != null) {
@@ -193,7 +193,7 @@ public class TcpSocket extends IcoThread {
                 mOutput.close();
                 mOutput = null;
             } catch (Exception e) {
-                log.ee(String.format("TCP输出流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP输出流关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
         if (mSocket != null) {
@@ -201,7 +201,7 @@ public class TcpSocket extends IcoThread {
                 mSocket.close();
                 mSocket = null;
             } catch (Exception e) {
-                log.ee(String.format("TCP关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
+                log.ew(String.format("TCP关闭异常，ip:%s,port:%d，Exception:" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName());
             }
         }
         log.d(String.format("TCP连接断开,ip:%s,port:%d", mIp, mPort), TcpSocket.class.getSimpleName());
@@ -394,7 +394,7 @@ public class TcpSocket extends IcoThread {
             try {
                 wait(mHeartInterval);
             } catch (InterruptedException e) {
-                log.ee(String.format("TCP发送心跳包等待时被唤醒，ip：%s，port：%d，Exception：" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+                log.ew(String.format("TCP发送心跳包等待时被唤醒，ip：%s，port：%d，Exception：" + e.toString(), mIp, mPort), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
             }
         }
 
@@ -420,7 +420,7 @@ public class TcpSocket extends IcoThread {
                 mLastSendTime = System.currentTimeMillis();
             } catch (Exception e) {
                 //e.printStackTrace();
-                log.ee(String.format("TCP发送数据异常，ip：%s，port：%d，数据长度：%d；数据：%s；Exception：%s", mIp, mPort, data.length, _log, e.toString()), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
+                log.ew(String.format("TCP发送数据异常，ip：%s，port：%d，数据长度：%d；数据：%s；Exception：%s", mIp, mPort, data.length, _log, e.toString()), TcpSocket.class.getSimpleName(), SendThread.class.getSimpleName());
                 mTcpCallback.onSend(TcpSocket.this, data, false);
             }
         }

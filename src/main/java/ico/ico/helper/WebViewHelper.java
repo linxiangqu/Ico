@@ -104,7 +104,7 @@ public class WebViewHelper {
     public static String execJsFunction(WebView webView, String function, Object... params) {
         //empty检查
         if (TextUtils.isEmpty(function)) {
-            log.ee("execJsFunction,function参数为空，无法构造js代码", TAG);
+            log.ew("execJsFunction,function参数为空，无法构造js代码", TAG);
             return null;
         }
 
@@ -148,7 +148,7 @@ public class WebViewHelper {
     public static String genJsCode(String function, Object... params) {
         //empty检查
         if (TextUtils.isEmpty(function)) {
-            log.ee("genJsCode,function参数为空，无法构造js代码", TAG);
+            log.ew("genJsCode,function参数为空，无法构造js代码", TAG);
             return null;
         }
         //函数名

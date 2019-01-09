@@ -248,7 +248,7 @@ public class WifiMgr {
             }
         } catch (Exception e) {
 //            e.printStackTrace();
-            log.ee("在连接WIFI时，获取已有的网络配置时异常，Exception:" + e.toString(), WifiMgr.class.getSimpleName(), "connectWifi");
+            log.ew("在连接WIFI时，获取已有的网络配置时异常，Exception:" + e.toString(), WifiMgr.class.getSimpleName(), "connectWifi");
         }
         // 构建网络配置对象
         WifiConfiguration wifiConfig = new WifiConfiguration();

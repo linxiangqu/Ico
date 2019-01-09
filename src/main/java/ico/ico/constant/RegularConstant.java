@@ -58,9 +58,13 @@ public class RegularConstant {
      */
     public final static String NETWORK = "(icmp_seq=\\d+)|(time=\\d+ ms)|(ttl=\\d+)";
     /**
-     * 用于检查是否包含16
+     * 用于检查是否只有16进制字符
      */
     public final static String BINARY_16 = "[0-9a-fA-F]+";
+    /**
+     * 用于检查是否包含16进制以外的字符
+     */
+    public final static String BINARY_16_REVERSE = "[g-zG-Z]+";
 
 
 }

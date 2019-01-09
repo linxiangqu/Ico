@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="BaseTabLayout">
+    <declare-styleable name="BaseTabLayouts">
         <attr format="dimension" name="tabIndicatorOffsetLeft"/>
         <attr format="dimension" name="tabIndicatorOffsetRight"/>
         <attr format="color" name="tabIndicatorColor"/>

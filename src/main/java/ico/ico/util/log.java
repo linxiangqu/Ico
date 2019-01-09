@@ -1,5 +1,7 @@
 package ico.ico.util;
 
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -7,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,10 +41,14 @@ public class log {
     }
 
     public static void v(String msg, String... tags) {
-        if (LEVEL < 5) {
+        if (LEVEL < 5 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + "v_" + concat("_", tags);
+        if (msg.length() <= MAX_SIZE) {
+            Log.v(tag, msg + "");
+            return;
+        }
         List<String> data = split(msg, MAX_SIZE);
         for (int i = 0; i < data.size(); i++) {
             Log.v(tag, data.get(i));
@@ -49,10 +56,14 @@ public class log {
     }
 
     public static void d(String msg, String... tags) {
-        if (LEVEL < 4) {
+        if (LEVEL < 4 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + "d_" + concat("_", tags);
+        if (msg.length() <= MAX_SIZE) {
+            Log.d(tag, msg + "");
+            return;
+        }
         List<String> data = split(msg, MAX_SIZE);
         for (int i = 0; i < data.size(); i++) {
             Log.d(tag, data.get(i));
@@ -60,10 +71,14 @@ public class log {
     }
 
     public static void i(String msg, String... tags) {
-        if (LEVEL < 3) {
+        if (LEVEL < 3 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + "i_" + concat("_", tags);
+        if (msg.length() <= MAX_SIZE) {
+            Log.i(tag, msg + "");
+            return;
+        }
         List<String> data = split(msg, MAX_SIZE);
         for (int i = 0; i < data.size(); i++) {
             Log.i(tag, data.get(i));
@@ -71,10 +86,14 @@ public class log {
     }
 
     public static void w(String msg, String... tags) {
-        if (LEVEL < 2) {
+        if (LEVEL < 2 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + "w_" + concat("_", tags);
+        if (msg.length() <= MAX_SIZE) {
+            Log.w(tag, msg + "");
+            return;
+        }
         List<String> data = split(msg, MAX_SIZE);
         for (int i = 0; i < data.size(); i++) {
             Log.w(tag, data.get(i));
@@ -82,19 +101,146 @@ public class log {
     }
 
     public static void e(String msg, String... tags) {
-        if (LEVEL < 1) {
+        if (LEVEL < 1 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + "e_" + concat("_", tags);
+        if (msg.length() <= MAX_SIZE) {
+            Log.e(tag, msg + "");
+            return;
+        }
         List<String> data = split(msg, MAX_SIZE);
         for (int i = 0; i < data.size(); i++) {
             Log.e(tag, data.get(i));
         }
     }
 
-
-    public static void ee(String msg, String... tags) {
+    public static void e(String msg, Exception e, String... tags) {
         if (LEVEL < 1) {
+            return;
+        }
+        if ("".equals(msg) && e == null) {
+            return;
+        }
+        String tag = COMMON_TAG + "e_" + concat("_", tags);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.e(tag, data.get(i), e);
+        }
+    }
+
+    public static void out(String msg, String... tags) {
+        if (LEVEL < 3 || TextUtils.isEmpty(msg)) {
+            return;
+        }
+        String tag = COMMON_TAG + concat("_", tags);
+        System.out.println(tag + "," + msg);
+    }
+
+    public static void err(String msg, String... tags) {
+        if (LEVEL < 1 || TextUtils.isEmpty(msg)) {
+            return;
+        }
+        String tag = COMMON_TAG + concat("_", tags);
+        System.err.println(tag + "," + msg);
+    }
+
+    public static void vv(String[] msgs, String... tags) {
+        if (LEVEL < 5 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + "v_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.v(tag, data.get(i));
+        }
+    }
+
+    public static void dd(String[] msgs, String... tags) {
+        if (LEVEL < 4 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + "d_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.d(tag, data.get(i));
+        }
+    }
+
+    public static void ii(String[] msgs, String... tags) {
+        if (LEVEL < 3 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + "i_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.i(tag, data.get(i));
+        }
+    }
+
+    public static void ww(String[] msgs, String... tags) {
+        if (LEVEL < 2 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + "w_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.w(tag, data.get(i));
+        }
+    }
+
+    public static void ee(String[] msgs, String... tags) {
+        if (LEVEL < 1 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + "e_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.e(tag, data.get(i));
+        }
+    }
+
+    public static void ee(String[] msgs, Exception e, String... tags) {
+        if (LEVEL < 1) {
+            return;
+        }
+        if ((msgs == null || msgs.length == 0) && e == null) {
+            return;
+        }
+        String tag = COMMON_TAG + "e_" + concat("_", tags);
+        String msg = concat("_", msgs);
+        List<String> data = split(msg, MAX_SIZE);
+        for (int i = 0; i < data.size(); i++) {
+            Log.e(tag, data.get(i));
+        }
+    }
+
+    public static void outt(String[] msgs, String... tags) {
+        if (LEVEL < 3 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + concat("_", tags);
+        String msg = concat("_", msgs);
+        System.out.println(tag + "," + msg);
+    }
+
+    public static void errr(String[] msgs, String... tags) {
+        if (LEVEL < 1 || msgs == null || msgs.length == 0) {
+            return;
+        }
+        String tag = COMMON_TAG + concat("_", tags);
+        String msg = concat("_", msgs);
+        System.err.println(tag + "," + msg);
+    }
+
+
+    public static void ew(String msg, String... tags) {
+        if (LEVEL < 1 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + concat("_", tags);
@@ -116,100 +262,28 @@ public class log {
         }.start();
     }
 
-    public static void out(String msg, String... tags) {
-        if (LEVEL < 3) {
+    public static void ew(String msg, Exception e, String... tags) {
+        if (LEVEL < 1 || TextUtils.isEmpty(msg)) {
             return;
         }
         String tag = COMMON_TAG + concat("_", tags);
-        System.out.println(tag + "," + msg);
+        Log.e(tag, msg);
+        //获取当前时间并格式化，不适用DateUtil是为了降低耦合性
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+        String currentDate = sdf.format(new Date());
+        //将错误信息写入错误日志中
+        final String text = String.format("%s   %s  %s\n", currentDate, tag, msg);
+        new IcoThread() {
+            @Override
+            public void run() {
+                try {
+                    writeFile(text, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
-
-    public static void err(String msg, String... tags) {
-        if (LEVEL < 1) {
-            return;
-        }
-        String tag = COMMON_TAG + concat("_", tags);
-        System.err.println(tag + "," + msg);
-    }
-
-    public static void vv(String[] msgs, String... tags) {
-        if (LEVEL < 5) {
-            return;
-        }
-        String tag = COMMON_TAG + "v_" + concat("_", tags);
-        String msg = concat("_", msgs);
-        List<String> data = split(msg, MAX_SIZE);
-        for (int i = 0; i < data.size(); i++) {
-            Log.v(tag, data.get(i));
-        }
-    }
-
-    public static void dd(String[] msgs, String... tags) {
-        if (LEVEL < 4) {
-            return;
-        }
-        String tag = COMMON_TAG + "d_" + concat("_", tags);
-        String msg = concat("_", msgs);
-        List<String> data = split(msg, MAX_SIZE);
-        for (int i = 0; i < data.size(); i++) {
-            Log.d(tag, data.get(i));
-        }
-    }
-
-    public static void ii(String[] msgs, String... tags) {
-        if (LEVEL < 3) {
-            return;
-        }
-        String tag = COMMON_TAG + "i_" + concat("_", tags);
-        String msg = concat("_", msgs);
-        List<String> data = split(msg, MAX_SIZE);
-        for (int i = 0; i < data.size(); i++) {
-            Log.i(tag, data.get(i));
-        }
-    }
-
-    public static void ww(String[] msgs, String... tags) {
-        if (LEVEL < 2) {
-            return;
-        }
-        String tag = COMMON_TAG + "w_" + concat("_", tags);
-        String msg = concat("_", msgs);
-        List<String> data = split(msg, MAX_SIZE);
-        for (int i = 0; i < data.size(); i++) {
-            Log.w(tag, data.get(i));
-        }
-    }
-
-    public static void ee(String[] msgs, String... tags) {
-        if (LEVEL < 1) {
-            return;
-        }
-        String tag = COMMON_TAG + "e_" + concat("_", tags);
-        String msg = concat("_", msgs);
-        List<String> data = split(msg, MAX_SIZE);
-        for (int i = 0; i < data.size(); i++) {
-            Log.e(tag, data.get(i));
-        }
-    }
-
-    public static void outt(String[] msgs, String... tags) {
-        if (LEVEL < 3) {
-            return;
-        }
-        String tag = COMMON_TAG + concat("_", tags);
-        String msg = concat("_", msgs);
-        System.out.println(tag + "," + msg);
-    }
-
-    public static void errr(String[] msgs, String... tags) {
-        if (LEVEL < 1) {
-            return;
-        }
-        String tag = COMMON_TAG + concat("_", tags);
-        String msg = concat("_", msgs);
-        System.err.println(tag + "," + msg);
-    }
-
 
     /**
      * 读取错误日志中的文本，用于开发时进行查看
@@ -234,10 +308,14 @@ public class log {
     public static void writeFile(String text, boolean isAppend) throws IOException {
         File file = new File(LOG);
         if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
+            if (!file.getParentFile().mkdirs()) {
+                return;
+            }
         }
         if (!file.exists()) {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                return;
+            }
         }
 
         FileWriter fw = null;
@@ -260,13 +338,56 @@ public class log {
     }
 
     /**
+     * 向错误日志中写入数据
+     *
+     * @param text
+     * @param isAppend
+     */
+    public static void writeFile(String text, Exception e, boolean isAppend) throws IOException {
+        File file = new File(LOG);
+        if (!file.getParentFile().exists()) {
+            if (!file.getParentFile().mkdirs()) {
+                return;
+            }
+        }
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                return;
+            }
+        }
+
+        FileWriter fw = null;
+        PrintWriter pw = null;
+        try {
+            fw = new FileWriter(file, isAppend);
+            if (isAppend) {
+                fw.write(text + "\n");
+            } else {
+                fw.write(text + "\n");
+            }
+            fw.flush();
+            pw = new PrintWriter(fw);
+            e.printStackTrace(pw);
+        } catch (FileNotFoundException e1) {
+            throw e1;
+        } finally {
+            SafeCloseUtil.close(fw);
+            SafeCloseUtil.close(pw);
+
+        }
+        log.out("已写入" + LOG);
+    }
+
+    /**
      * 将一个字符串数组根据某个字符串连接
      *
      * @param str   要插入的字符串
-     * @param texts 要被拼接的字符串数组
+     * @param texts 要被拼接的字符串数组,如果传入null或者空数组，则将返回空字符串
      * @return
      */
     public static String concat(String str, String... texts) {
+        if (texts == null || texts.length == 0) return "";
+        if (texts.length == 1) return texts[0];
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < texts.length; i++) {
             String tmp = texts[i];
@@ -281,25 +402,27 @@ public class log {
     /**
      * 将一个字符串根据指定长度进行分割
      *
-     * @return
+     * @param str  要分割的字符串，如果传入的是个null值，则将拼接 空字符串 添加到集合中进行返回
+     * @param size 指定的长度，分割的每个部分保证不大于这个长度
+     * @return List(String) 返回一个集合，集合必定不为空并且至少有一个数据
      */
+    @NonNull
     public static List<String> split(String str, int size) {
         List<String> data = new ArrayList<>();
-        if (str.length() <= size) {
-            data.add(str);
-            return data;
-        } else {
-            while (true) {
-                if (str.length() > size) {
-                    data.add(str.substring(0, size));
-                } else {
-                    data.add(str.substring(0));
-                    break;
-                }
-                str = str.substring(size);
-            }
+        if (TextUtils.isEmpty(str) || str.length() <= size) {
+            data.add(str + "");
             return data;
         }
+        while (true) {
+            if (str.length() > size) {
+                data.add(str.substring(0, size));
+            } else {
+                data.add(str);
+                break;
+            }
+            str = str.substring(size);
+        }
+        return data;
     }
 
     /**

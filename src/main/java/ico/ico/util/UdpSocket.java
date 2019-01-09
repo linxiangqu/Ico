@@ -140,7 +140,7 @@ public class UdpSocket extends IcoThread {
                 setConnected(true);
                 break;
             } catch (Exception e) {
-                log.ee(String.format("UDP建立连接失败%d,port:%d,Exception:" + e.toString(), i, mPort) + i, UdpSocket.class.getSimpleName());
+                log.ew(String.format("UDP建立连接失败%d,port:%d,Exception:" + e.toString(), i, mPort) + i, UdpSocket.class.getSimpleName());
                 //失败次数超过设置上限，回调，关闭，结束
                 if (i == mMaxConnectTimes - 1) {
                     mUdpCallback.onCreatefail(this);
@@ -170,12 +170,12 @@ public class UdpSocket extends IcoThread {
                 mUdpCallback.onReceive(receive);
             } catch (IOException e) {
                 //e.printStackTrace();
-                log.ee("UDP连接IO流异常，Exception:" + e.toString(), UdpSocket.class.getSimpleName());
+                log.ew("UDP连接IO流异常，Exception:" + e.toString(), UdpSocket.class.getSimpleName());
                 close();
                 return;
             } catch (Exception e) {
                 //e.printStackTrace();
-                log.ee("UDP异常，Exception:" + e.toString(), UdpSocket.class.getSimpleName());
+                log.ew("UDP异常，Exception:" + e.toString(), UdpSocket.class.getSimpleName());
             }
         }
     }

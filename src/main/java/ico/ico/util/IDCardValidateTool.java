@@ -27,7 +27,7 @@ public class IDCardValidateTool {
     /**
      * 省、直辖市代码表
      */
-    public static final String CITY_CODE[] = {
+    public static final String cityCode[] = {
             "11", "12", "13", "14", "15", "21", "22", "23", "31", "32", "33", "34", "35", "36", "37", "41",
             "42", "43", "44", "45", "46", "50", "51", "52", "53", "54", "61", "62", "63", "64", "65", "71",
             "81", "82", "91"
@@ -36,14 +36,14 @@ public class IDCardValidateTool {
     /**
      * 每位加权因子
      */
-    public static final int POWER[] = {
+    public static final int power[] = {
             7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2
     };
 
     /**
      * 第18位校检码
      */
-    public static final String VERIFY_CODE[] = {
+    public static final String verifyCode[] = {
             "1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"
     };
     /**
@@ -153,12 +153,11 @@ public class IDCardValidateTool {
             try {
                 birthDate = new SimpleDateFormat("yyMMdd").parse(birthday);
             } catch (ParseException e) {
-                e.printStackTrace();
+                log.e(e.getMessage(), TAG);
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null) {
+            if (birthDate != null)
                 cal.setTime(birthDate);
-            }
             // 获取出生年(完全表现形式,如：2010)
             String sYear = String.valueOf(cal.get(Calendar.YEAR));
             idCard18 = idCard.substring(0, 6) + sYear + idCard.substring(8);
@@ -194,7 +193,7 @@ public class IDCardValidateTool {
         }
         String[] cardval = validateIdCard10(card);
         if (cardval != null) {
-            if (TextUtils.equals("true", cardval[2])) {
+            if (cardval[2].equals("true")) {
                 return true;
             }
         }
@@ -252,14 +251,14 @@ public class IDCardValidateTool {
             try {
                 birthDate = new SimpleDateFormat("yy").parse(birthCode.substring(0, 2));
             } catch (ParseException e) {
-                e.printStackTrace();
+                log.e(e.getMessage(), TAG);
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null) {
+            if (birthDate != null)
                 cal.setTime(birthDate);
-            }
-            if (!valiDate(cal.get(Calendar.YEAR), Integer.valueOf(birthCode.substring(2, 4)),
-                    Integer.valueOf(birthCode.substring(4, 6)))) {
+            //ICO fix 装箱后立即拆箱是无意义的行为
+            if (!valiDate(cal.get(Calendar.YEAR), Integer.parseInt(birthCode.substring(2, 4)),
+                    Integer.parseInt(birthCode.substring(4, 6)))) {
                 return false;
             }
         } else {
@@ -288,10 +287,10 @@ public class IDCardValidateTool {
             info[0] = "台湾";
             System.out.println("11111");
             String char2 = idCard.substring(1, 2);
-            if (TextUtils.equals("1",char2)) {
+            if (char2.equals("1")) {
                 info[1] = "M";
                 System.out.println("MMMMMMM");
-            } else if (TextUtils.equals("2",char2)) {
+            } else if (char2.equals("2")) {
                 info[1] = "F";
                 System.out.println("FFFFFFF");
             } else {
@@ -330,10 +329,10 @@ public class IDCardValidateTool {
         char[] chars = mid.toCharArray();
         Integer iflag = 8;
         for (char c : chars) {
-            sum = sum + Integer.valueOf(c + "") * iflag;
+            sum = sum + Integer.parseInt(c + "") * iflag;
             iflag--;
         }
-        return (sum % 10 == 0 ? 0 : (10 - sum % 10)) == Integer.valueOf(end) ? true : false;
+        return (sum % 10 == 0 ? 0 : (10 - sum % 10)) == Integer.parseInt(end);
     }
 
     /**
@@ -364,16 +363,16 @@ public class IDCardValidateTool {
         char[] chars = mid.toCharArray();
         Integer iflag = 7;
         for (char c : chars) {
-            sum = sum + Integer.valueOf(c + "") * iflag;
+            sum = sum + Integer.parseInt(c + "") * iflag;
             iflag--;
         }
-
-        if (TextUtils.equals("A",end.toUpperCase())) {
+        //ICO fix 应直接使用equalsIgnoreCase避免大小写转化String的再创建
+        if ("A".equalsIgnoreCase(end)) {
             sum = sum + 10;
         } else {
-            sum = sum + Integer.valueOf(end);
+            sum = sum + Integer.parseInt(end);
         }
-        return (sum % 11 == 0) ? true : false;
+        return (sum % 11 == 0);
     }
 
     /**
@@ -390,7 +389,7 @@ public class IDCardValidateTool {
                 iArr[i] = Integer.parseInt(String.valueOf(ca[i]));
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.e(e.getMessage(), TAG);
         }
         return iArr;
     }
@@ -403,11 +402,11 @@ public class IDCardValidateTool {
      */
     public static int getPowerSum(int[] iArr) {
         int iSum = 0;
-        if (POWER.length == iArr.length) {
+        if (power.length == iArr.length) {
             for (int i = 0; i < iArr.length; i++) {
-                for (int j = 0; j < POWER.length; j++) {
+                for (int j = 0; j < power.length; j++) {
                     if (i == j) {
-                        iSum = iSum + iArr[i] * POWER[j];
+                        iSum = iSum + iArr[i] * power[j];
                     }
                 }
             }
@@ -465,18 +464,26 @@ public class IDCardValidateTool {
      * 根据身份编号获取年龄
      *
      * @param idCard 身份编号
-     * @return 年龄
+     * @return 年龄，0代表获取不到
      */
     public static int getAgeByIdCard(String idCard) {
+        if (TextUtils.isEmpty(idCard)) {
+            return 0;
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return 0;
+        }
         int iAge = 0;
         if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
         }
+        if (TextUtils.isEmpty(idCard)) {
+            return 0;
+        }
         String year = idCard.substring(6, 10);
         Calendar cal = Calendar.getInstance();
         int iCurrYear = cal.get(Calendar.YEAR);
-        iAge = iCurrYear - Integer.valueOf(year);
-        return iAge;
+        return iCurrYear - Integer.parseInt(year);
     }
 
     /**
@@ -486,11 +493,17 @@ public class IDCardValidateTool {
      * @return 生日(yyyyMMdd)
      */
     public static String getBirthByIdCard(String idCard) {
-        Integer len = idCard.length();
-        if (len < CHINA_ID_MIN_LENGTH) {
+        if (TextUtils.isEmpty(idCard)) {
             return null;
-        } else if (len == CHINA_ID_MIN_LENGTH) {
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return null;
+        }
+        if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
+        }
+        if (TextUtils.isEmpty(idCard)) {
+            return null;
         }
         return idCard.substring(6, 14);
     }
@@ -502,11 +515,17 @@ public class IDCardValidateTool {
      * @return 生日(yyyy)
      */
     public static Short getYearByIdCard(String idCard) {
-        Integer len = idCard.length();
-        if (len < CHINA_ID_MIN_LENGTH) {
+        if (TextUtils.isEmpty(idCard)) {
             return null;
-        } else if (len == CHINA_ID_MIN_LENGTH) {
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return null;
+        }
+        if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
+        }
+        if (TextUtils.isEmpty(idCard)) {
+            return null;
         }
         return Short.valueOf(idCard.substring(6, 10));
     }
@@ -518,11 +537,17 @@ public class IDCardValidateTool {
      * @return 生日(MM)
      */
     public static Short getMonthByIdCard(String idCard) {
-        Integer len = idCard.length();
-        if (len < CHINA_ID_MIN_LENGTH) {
+        if (TextUtils.isEmpty(idCard)) {
             return null;
-        } else if (len == CHINA_ID_MIN_LENGTH) {
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return null;
+        }
+        if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
+        }
+        if (TextUtils.isEmpty(idCard)) {
+            return null;
         }
         return Short.valueOf(idCard.substring(10, 12));
     }
@@ -534,11 +559,17 @@ public class IDCardValidateTool {
      * @return 生日(dd)
      */
     public static Short getDateByIdCard(String idCard) {
-        Integer len = idCard.length();
-        if (len < CHINA_ID_MIN_LENGTH) {
+        if (TextUtils.isEmpty(idCard)) {
             return null;
-        } else if (len == CHINA_ID_MIN_LENGTH) {
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return null;
+        }
+        if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
+        }
+        if (TextUtils.isEmpty(idCard)) {
+            return null;
         }
         return Short.valueOf(idCard.substring(12, 14));
     }
@@ -551,8 +582,17 @@ public class IDCardValidateTool {
      */
     public static String getGenderByIdCard(String idCard) {
         String sGender = "N";
+        if (TextUtils.isEmpty(idCard)) {
+            return sGender;
+        }
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return sGender;
+        }
         if (idCard.length() == CHINA_ID_MIN_LENGTH) {
             idCard = conver15CardTo18(idCard);
+        }
+        if (TextUtils.isEmpty(idCard)) {
+            return sGender;
         }
         String sCardNum = idCard.substring(16, 17);
         if (Integer.parseInt(sCardNum) % 2 != 0) {
@@ -570,14 +610,14 @@ public class IDCardValidateTool {
      * @return 省级编码。
      */
     public static String getProvinceByIdCard(String idCard) {
-        int len = idCard.length();
-        String sProvince = null;
-        String sProvinNum = "";
-        if (len == CHINA_ID_MIN_LENGTH || len == CHINA_ID_MAX_LENGTH) {
-            sProvinNum = idCard.substring(0, 2);
+        if (TextUtils.isEmpty(idCard)) {
+            return null;
         }
-        sProvince = cityCodes.get(sProvinNum);
-        return sProvince;
+        if (idCard.length() != CHINA_ID_MIN_LENGTH && idCard.length() != CHINA_ID_MAX_LENGTH) {
+            return null;
+        }
+        String sProvinNum = idCard.substring(0, 2);
+        return cityCodes.get(sProvinNum);
     }
 
     /**
@@ -587,7 +627,7 @@ public class IDCardValidateTool {
      * @return 提取的数字。
      */
     public static boolean isNum(String val) {
-        return val == null || TextUtils.equals("",val) ? false : val.matches("^[0-9]*$");
+        return val == null || "".equals(val) ? false : val.matches("^[0-9]*$");
     }
 
     /**
